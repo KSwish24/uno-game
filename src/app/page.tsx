@@ -1,65 +1,175 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import * as api from "@/lib/api";
 
 export default function Home() {
+  const router = useRouter();
+  const [mode, setMode] = useState<"menu" | "create" | "join">("menu");
+  const [playerName, setPlayerName] = useState("");
+  const [roomCode, setRoomCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleCreate() {
+    if (!playerName.trim()) {
+      setError("Enter your name");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const { code, playerId } = await api.createGame(playerName.trim());
+      router.push(`/game/${code}?pid=${playerId}`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to create game");
+      setLoading(false);
+    }
+  }
+
+  async function handleJoin() {
+    if (!playerName.trim()) {
+      setError("Enter your name");
+      return;
+    }
+    if (!roomCode.trim() || roomCode.trim().length !== 4) {
+      setError("Enter a 4-letter room code");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const { code, playerId } = await api.joinGame(roomCode.trim().toUpperCase(), playerName.trim());
+      router.push(`/game/${code}?pid=${playerId}`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to join game");
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4">
+      {/* Logo / Title */}
+      <div className="text-center mb-10">
+        <h1 className="text-6xl sm:text-8xl font-black tracking-tight">
+          <span className="text-red-500">U</span>
+          <span className="text-blue-500">N</span>
+          <span className="text-green-500">O</span>
+        </h1>
+        <p className="text-gray-500 mt-2 text-sm tracking-widest uppercase">
+          Multiplayer Card Game
+        </p>
+      </div>
+
+      <div className="w-full max-w-sm">
+        {mode === "menu" && (
+          <div className="space-y-3">
+            <button
+              onClick={() => setMode("create")}
+              className="w-full py-4 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 text-white font-bold text-lg rounded-2xl shadow-lg shadow-red-600/20 hover:shadow-red-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              Create Game
+            </button>
+            <button
+              onClick={() => setMode("join")}
+              className="w-full py-4 bg-gray-800 hover:bg-gray-700 text-white font-bold text-lg rounded-2xl border border-gray-700 hover:border-gray-600 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+              Join Game
+            </button>
+          </div>
+        )}
+
+        {mode === "create" && (
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <h2 className="text-white text-xl font-bold">Create a Game</h2>
+            <div>
+              <label className="text-gray-400 text-sm block mb-1">Your Name</label>
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+                placeholder="Enter your name"
+                maxLength={16}
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                autoFocus
+              />
+            </div>
+            {error && (
+              <p className="text-red-400 text-sm">{error}</p>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setMode("menu"); setError(null); }}
+                className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-xl transition-colors"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={loading}
+                className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "Creating..." : "Create"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {mode === "join" && (
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <h2 className="text-white text-xl font-bold">Join a Game</h2>
+            <div>
+              <label className="text-gray-400 text-sm block mb-1">Your Name</label>
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                placeholder="Enter your name"
+                maxLength={16}
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="text-gray-400 text-sm block mb-1">Room Code</label>
+              <input
+                type="text"
+                value={roomCode}
+                onChange={(e) => setRoomCode(e.target.value.toUpperCase().slice(0, 4))}
+                onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                placeholder="ABCD"
+                maxLength={4}
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-center text-2xl font-bold tracking-[0.3em] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+              />
+            </div>
+            {error && (
+              <p className="text-red-400 text-sm">{error}</p>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setMode("menu"); setError(null); }}
+                className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-xl transition-colors"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleJoin}
+                disabled={loading}
+                className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "Joining..." : "Join"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <p className="text-gray-700 text-xs mt-12">
+        2-4 players &middot; Share the room code to play together
+      </p>
     </div>
   );
 }
