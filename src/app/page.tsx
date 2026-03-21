@@ -67,13 +67,15 @@ export default function Home() {
           <div className="space-y-3">
             <button
               onClick={() => setMode("create")}
-              className="w-full py-4 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 text-white font-bold text-lg rounded-2xl shadow-lg shadow-red-600/20 hover:shadow-red-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              onTouchEnd={(e) => { e.preventDefault(); setMode("create"); }}
+              className="w-full py-4 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 text-white font-bold text-lg rounded-2xl shadow-lg shadow-red-600/20 transition-colors cursor-pointer"
             >
               Create Game
             </button>
             <button
               onClick={() => setMode("join")}
-              className="w-full py-4 bg-gray-800 hover:bg-gray-700 text-white font-bold text-lg rounded-2xl border border-gray-700 hover:border-gray-600 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              onTouchEnd={(e) => { e.preventDefault(); setMode("join"); }}
+              className="w-full py-4 bg-gray-800 hover:bg-gray-700 text-white font-bold text-lg rounded-2xl border border-gray-700 hover:border-gray-600 transition-colors cursor-pointer"
             >
               Join Game
             </button>
