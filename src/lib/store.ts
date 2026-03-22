@@ -1,42 +1,29 @@
+import { Redis } from "@upstash/redis";
 import { GameState } from "./types";
 
-// In-memory game store
-// For Vercel serverless: this works in dev and in single-instance deployments.
-// For production at scale, swap this for Vercel KV / Upstash Redis.
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
-const games = new Map<string, GameState>();
+const KEY_PREFIX = "uno:game:";
+const TTL = 2 * 60 * 60; // 2 hours
 
-// Clean up games older than 2 hours
-function cleanup() {
-  const cutoff = Date.now() - 2 * 60 * 60 * 1000;
-  for (const [code, game] of games) {
-    if (game.updatedAt < cutoff) {
-      games.delete(code);
-    }
-  }
+export async function getGame(code: string): Promise<GameState | null> {
+  const data = await redis.get<GameState>(KEY_PREFIX + code.toUpperCase());
+  return data || null;
 }
 
-// Run cleanup every 10 minutes
-if (typeof globalThis !== "undefined") {
-  // Avoid multiple intervals in HMR
-  const g = globalThis as unknown as { _unoCleanup?: ReturnType<typeof setInterval> };
-  if (!g._unoCleanup) {
-    g._unoCleanup = setInterval(cleanup, 10 * 60 * 1000);
-  }
+export async function setGame(game: GameState): Promise<void> {
+  game.updatedAt = Date.now();
+  await redis.set(KEY_PREFIX + game.code.toUpperCase(), game, { ex: TTL });
 }
 
-export function getGame(code: string): GameState | undefined {
-  return games.get(code.toUpperCase());
+export async function deleteGame(code: string): Promise<void> {
+  await redis.del(KEY_PREFIX + code.toUpperCase());
 }
 
-export function setGame(game: GameState): void {
-  games.set(game.code.toUpperCase(), game);
-}
-
-export function deleteGame(code: string): void {
-  games.delete(code.toUpperCase());
-}
-
-export function hasGame(code: string): boolean {
-  return games.has(code.toUpperCase());
+export async function hasGame(code: string): Promise<boolean> {
+  const exists = await redis.exists(KEY_PREFIX + code.toUpperCase());
+  return exists === 1;
 }

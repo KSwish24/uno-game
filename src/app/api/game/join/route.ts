@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Player name is required" }, { status: 400 });
     }
 
-    const game = getGame(code.toUpperCase());
+    const game = await getGame(code.toUpperCase());
     if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: err }, { status: 400 });
     }
 
-    setGame(game);
+    await setGame(game);
 
     return NextResponse.json({
       code: game.code,

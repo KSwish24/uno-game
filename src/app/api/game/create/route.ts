@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
     // Ensure unique code
     let attempts = 0;
-    while (hasGame(game.code) && attempts < 20) {
+    while (await hasGame(game.code) && attempts < 20) {
       const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
       game.code = "";
       for (let i = 0; i < 4; i++) {
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       attempts++;
     }
 
-    setGame(game);
+    await setGame(game);
 
     return NextResponse.json({
       code: game.code,

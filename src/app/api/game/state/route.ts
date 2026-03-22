@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPlayerView } from "@/lib/game-engine";
-import { getGame } from "@/lib/store";
+import { getGame, setGame } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const game = getGame(code);
+  const game = await getGame(code);
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
@@ -28,6 +28,7 @@ export async function GET(request: Request) {
 
   // Mark player as connected
   player.connected = true;
+  await setGame(game);
 
   const view = getPlayerView(game, playerId);
   return NextResponse.json(view);

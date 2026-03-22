@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGame } from "@/lib/store";
+import { getGame, setGame } from "@/lib/store";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.redirect(new URL("/join?error=missing", request.url));
     }
 
-    const game = getGame(code);
+    const game = await getGame(code);
     if (!game) {
       return NextResponse.redirect(new URL("/join?error=notfound", request.url));
     }
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       calledUno: false,
       connected: true,
     });
-    game.updatedAt = Date.now();
+    await setGame(game);
 
     return NextResponse.redirect(new URL(`/game/${code}?pid=${playerId}`, request.url));
   } catch {

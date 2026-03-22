@@ -19,10 +19,10 @@ export async function POST(request: NextRequest) {
     }
 
     let code = generateCode();
-    while (hasGame(code)) code = generateCode();
+    while (await hasGame(code)) code = generateCode();
 
     const playerId = crypto.randomUUID();
-    setGame({
+    await setGame({
       code,
       status: "lobby",
       players: [{
