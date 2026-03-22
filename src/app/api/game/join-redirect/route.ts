@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Check if rejoining
     const existing = game.players.find(p => p.name.toLowerCase() === playerName.trim().toLowerCase());
     if (existing) {
-      return NextResponse.redirect(new URL(`/game/${code}?pid=${existing.id}`, request.url));
+      return NextResponse.redirect(new URL(`/play.html?code=${code}&pid=${existing.id}`, request.url));
     }
 
     const playerId = crypto.randomUUID();
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     });
     await setGame(game);
 
-    return NextResponse.redirect(new URL(`/game/${code}?pid=${playerId}`, request.url));
+    return NextResponse.redirect(new URL(`/play.html?code=${code}&pid=${playerId}`, request.url));
   } catch {
     return NextResponse.redirect(new URL("/join?error=unknown", request.url));
   }
