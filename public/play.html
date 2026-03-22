@@ -685,47 +685,105 @@ body {
   function launchFireworks() {
     var container = document.getElementById("fireworks");
     container.className = "fireworks active";
-    var colors = ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6", "#ec4899", "#8b5cf6", "#f97316", "#14b8a6"];
+    var colors = ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6", "#ec4899", "#8b5cf6", "#f97316", "#14b8a6", "#fbbf24", "#a78bfa", "#fb923c", "#34d399", "#f472b6", "#60a5fa"];
     var burst = 0;
-    var maxBursts = 12;
+    var maxBursts = 40;
+    var ww = window.innerWidth;
+    var wh = window.innerHeight;
 
     function doBurst() {
       if (burst >= maxBursts) {
-        setTimeout(function() { container.className = "fireworks"; container.innerHTML = ""; }, 2000);
+        // Keep going with a second wave
+        setTimeout(function() { doSecondWave(0); }, 200);
         return;
       }
       burst++;
-      var cx = Math.random() * window.innerWidth;
-      var cy = Math.random() * window.innerHeight * 0.6 + 50;
-      var particles = 20 + Math.floor(Math.random() * 15);
+      // Multiple simultaneous bursts
+      var simultaneous = 1 + Math.floor(Math.random() * 3);
+      for (var s = 0; s < simultaneous; s++) {
+        var cx = Math.random() * ww;
+        var cy = Math.random() * wh * 0.7 + 30;
+        var particles = 35 + Math.floor(Math.random() * 30);
+        var burstColor = colors[Math.floor(Math.random() * colors.length)];
+        var useRainbow = Math.random() > 0.5;
+        for (var i = 0; i < particles; i++) {
+          var dot = document.createElement("div");
+          var angle = (Math.PI * 2 * i) / particles + (Math.random() - 0.5) * 0.3;
+          var dist = 60 + Math.random() * 140;
+          var dx = Math.cos(angle) * dist;
+          var dy = Math.sin(angle) * dist;
+          var c = useRainbow ? colors[Math.floor(Math.random() * colors.length)] : burstColor;
+          var size = 3 + Math.floor(Math.random() * 7);
+          dot.style.cssText = "position:absolute;left:" + cx + "px;top:" + cy + "px;width:" + size + "px;height:" + size + "px;background:" + c + ";border-radius:50%;pointer-events:none;box-shadow:0 0 " + (size + 4) + "px " + c + ";";
+          container.appendChild(dot);
+          animateParticle(dot, dx, dy, 1000 + Math.random() * 600);
+        }
+        // Add some sparkle trails
+        for (var j = 0; j < 8; j++) {
+          var sparkle = document.createElement("div");
+          var sa = Math.random() * Math.PI * 2;
+          var sd = 30 + Math.random() * 200;
+          var sdx = Math.cos(sa) * sd;
+          var sdy = Math.sin(sa) * sd;
+          sparkle.style.cssText = "position:absolute;left:" + cx + "px;top:" + cy + "px;width:2px;height:2px;background:#fff;border-radius:50%;pointer-events:none;box-shadow:0 0 6px #fff;";
+          container.appendChild(sparkle);
+          animateParticle(sparkle, sdx, sdy, 600 + Math.random() * 400);
+        }
+      }
+      setTimeout(doBurst, 150 + Math.random() * 200);
+    }
+
+    function doSecondWave(count) {
+      if (count >= 20) {
+        // Final grand finale — massive burst from center
+        var fcx = ww / 2;
+        var fcy = wh / 2;
+        for (var i = 0; i < 100; i++) {
+          var dot = document.createElement("div");
+          var angle = Math.random() * Math.PI * 2;
+          var dist = 80 + Math.random() * 250;
+          var dx = Math.cos(angle) * dist;
+          var dy = Math.sin(angle) * dist;
+          var c = colors[Math.floor(Math.random() * colors.length)];
+          var size = 4 + Math.floor(Math.random() * 8);
+          dot.style.cssText = "position:absolute;left:" + fcx + "px;top:" + fcy + "px;width:" + size + "px;height:" + size + "px;background:" + c + ";border-radius:50%;pointer-events:none;box-shadow:0 0 " + (size + 6) + "px " + c + ";";
+          container.appendChild(dot);
+          animateParticle(dot, dx, dy, 1200 + Math.random() * 800);
+        }
+        setTimeout(function() { container.className = "fireworks"; container.innerHTML = ""; }, 3000);
+        return;
+      }
+      // Scattered bursts across the screen
+      var cx = Math.random() * ww;
+      var cy = Math.random() * wh * 0.8;
+      var particles = 25 + Math.floor(Math.random() * 20);
       for (var i = 0; i < particles; i++) {
         var dot = document.createElement("div");
-        dot.className = "firework";
         var angle = (Math.PI * 2 * i) / particles;
-        var dist = 40 + Math.random() * 80;
+        var dist = 50 + Math.random() * 120;
         var dx = Math.cos(angle) * dist;
         var dy = Math.sin(angle) * dist;
         var c = colors[Math.floor(Math.random() * colors.length)];
-        var size = 4 + Math.floor(Math.random() * 5);
-        dot.style.cssText = "left:" + cx + "px;top:" + cy + "px;width:" + size + "px;height:" + size + "px;background:" + c + ";animation:none;";
+        var size = 3 + Math.floor(Math.random() * 6);
+        dot.style.cssText = "position:absolute;left:" + cx + "px;top:" + cy + "px;width:" + size + "px;height:" + size + "px;background:" + c + ";border-radius:50%;pointer-events:none;box-shadow:0 0 " + (size + 4) + "px " + c + ";";
         container.appendChild(dot);
-        animateParticle(dot, dx, dy);
+        animateParticle(dot, dx, dy, 900 + Math.random() * 500);
       }
-      setTimeout(doBurst, 400 + Math.random() * 300);
+      setTimeout(function() { doSecondWave(count + 1); }, 100 + Math.random() * 150);
     }
 
-    function animateParticle(el, dx, dy) {
+    function animateParticle(el, dx, dy, duration) {
       var startX = parseFloat(el.style.left);
       var startY = parseFloat(el.style.top);
       var start = Date.now();
-      var duration = 800 + Math.random() * 400;
+      var gravity = 40 + Math.random() * 40;
       function step() {
         var elapsed = Date.now() - start;
         var progress = Math.min(elapsed / duration, 1);
         var ease = 1 - Math.pow(1 - progress, 3);
         el.style.left = (startX + dx * ease) + "px";
-        el.style.top = (startY + dy * ease + progress * progress * 60) + "px";
-        el.style.opacity = String(1 - progress);
+        el.style.top = (startY + dy * ease + progress * progress * gravity) + "px";
+        el.style.opacity = String(Math.max(0, 1 - progress * 1.2));
         if (progress < 1) {
           requestAnimationFrame(step);
         } else {
