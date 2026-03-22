@@ -51,15 +51,25 @@ body {
 .gtw-btn.active { border-color: #f59e0b; background: #1c1917; color: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.3); }
 
 /* Game Board */
-.screen-game { padding: 8px; padding-bottom: 0; }
-.opponents { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; padding: 4px 0; gap: 6px; }
-.opp { background: #111827; border: 2px solid #1f2937; border-radius: 10px; padding: 6px 12px; font-size: 13px; text-align: center; min-width: 80px; position: relative; }
+.screen-game { padding: 0; padding-bottom: 0; display: flex; flex-direction: column; min-height: 100vh; }
+.screen-game.active { display: flex; justify-content: flex-start; }
+.game-middle { display: flex; flex: 1; align-items: stretch; }
+.opp-slot { display: flex; align-items: center; justify-content: center; }
+.opp-top { width: 100%; padding: 8px 0; }
+.opp-side { width: 70px; flex-shrink: 0; padding: 4px; }
+.opp { background: #111827; border: 2px solid #1f2937; border-radius: 10px; padding: 6px 12px; font-size: 13px; text-align: center; min-width: 60px; position: relative; }
 .opp.active-turn { border-color: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.5); }
 .opp .opp-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
 .opp .opp-cards { color: #9ca3af; font-size: 11px; margin-top: 2px; }
-.opp .uno-badge { color: #ef4444; font-weight: 700; font-size: 10px; }
-.opp .turn-arrow { display: none; position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 18px; color: #f59e0b; animation: bounceArrow 0.6s ease-in-out infinite alternate; }
+.opp .turn-arrow { display: none; position: absolute; font-size: 18px; color: #f59e0b; animation: bounceArrow 0.6s ease-in-out infinite alternate; }
+.opp-top .turn-arrow { bottom: -18px; left: 50%; transform: translateX(-50%); }
+.opp-side .turn-arrow { font-size: 14px; }
+.opp-left-slot .turn-arrow { right: -16px; top: 50%; transform: translateY(-50%); }
+.opp-right-slot .turn-arrow { left: -16px; top: 50%; transform: translateY(-50%); }
 .opp.active-turn .turn-arrow { display: block; }
+.opp-side .opp { font-size: 11px; padding: 6px 6px; min-width: auto; }
+.opp-side .opp-name { max-width: 55px; font-size: 11px; }
+.opp-side .opp-cards { font-size: 10px; }
 @-webkit-keyframes bounceArrow { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(4px); } }
 @keyframes bounceArrow { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(4px); } }
 
@@ -90,7 +100,7 @@ body {
 .scoreboard .score-wins { color: #22c55e; font-weight: 700; }
 
 /* Center area */
-.center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 8px 0; position: relative; }
+.center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 0; position: relative; }
 .direction-indicator { font-size: 20px; color: #6b7280; margin-bottom: 4px; }
 .pile-area { display: flex; align-items: center; justify-content: center; gap: 24px; margin: 8px 0; }
 .top-card { width: 70px; height: 100px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; border: 3px solid rgba(255,255,255,0.2); position: relative; }
@@ -221,24 +231,28 @@ body {
 <!-- Game Screen -->
 <div id="screen-game" class="screen screen-game">
   <div id="scoreboard" class="scoreboard" style="display:none;"></div>
-  <div id="opponents" class="opponents"></div>
-  <div class="center">
-    <div id="direction" class="direction-indicator"></div>
-    <div id="turn-msg" class="turn-msg"></div>
-    <div class="pile-area">
-      <div id="top-card" class="top-card"></div>
-      <div id="draw-pile-wrapper" class="draw-pile-wrapper">
-        <div class="draw-pile-stack draw-pile-stack-1"></div>
-        <div class="draw-pile-stack draw-pile-stack-2"></div>
-        <div id="draw-pile" class="draw-pile" onclick="drawCard()">
-          <div id="deck-count" class="deck-count"></div>
-          <div class="deck-label">DRAW</div>
+  <div id="opp-top" class="opp-slot opp-top"></div>
+  <div class="game-middle">
+    <div id="opp-left" class="opp-slot opp-side opp-left-slot"></div>
+    <div class="center">
+      <div id="direction" class="direction-indicator"></div>
+      <div id="turn-msg" class="turn-msg"></div>
+      <div class="pile-area">
+        <div id="top-card" class="top-card"></div>
+        <div id="draw-pile-wrapper" class="draw-pile-wrapper">
+          <div class="draw-pile-stack draw-pile-stack-1"></div>
+          <div class="draw-pile-stack draw-pile-stack-2"></div>
+          <div id="draw-pile" class="draw-pile" onclick="drawCard()">
+            <div id="deck-count" class="deck-count"></div>
+            <div class="deck-label">DRAW</div>
+          </div>
         </div>
       </div>
+      <div id="color-indicator"></div>
+      <div id="must-draw-msg" class="must-draw-msg"></div>
+      <div id="last-action" class="last-action"></div>
     </div>
-    <div id="color-indicator"></div>
-    <div id="must-draw-msg" class="must-draw-msg"></div>
-    <div id="last-action" class="last-action"></div>
+    <div id="opp-right" class="opp-slot opp-side opp-right-slot"></div>
   </div>
   <div id="my-turn-arrow" class="my-turn-arrow">&darr;</div>
   <div class="hand-wrapper">
@@ -446,27 +460,53 @@ body {
       sbEl.style.display = "none";
     }
 
-    // Opponents
-    var oppHtml = "";
+    // Opponents — distribute around the table
     var myIndex = -1;
     for (var i = 0; i < state.players.length; i++) {
       if (state.players[i].id === state.myId) { myIndex = i; break; }
     }
-    for (var i = 0; i < state.players.length; i++) {
-      if (i === myIndex) continue;
-      var p = state.players[i];
-      var isActive = (i === state.currentPlayerIndex);
-      oppHtml += '<div class="opp' + (isActive ? ' active-turn' : '') + '">';
-      oppHtml += '<div class="opp-name">' + escapeHtml(p.name) + '</div>';
-      oppHtml += '<div class="opp-cards">' + p.cardCount + ' card' + (p.cardCount !== 1 ? 's' : '');
-      oppHtml += '</div>';
-      oppHtml += '<div class="turn-arrow">&darr;</div>';
-      oppHtml += '</div>';
+    var opponents = [];
+    var n = state.players.length;
+    // Collect opponents in play order starting from the player after me
+    for (var k = 1; k < n; k++) {
+      var idx = (myIndex + k) % n;
+      opponents.push({ player: state.players[idx], index: idx });
     }
-    document.getElementById("opponents").innerHTML = oppHtml;
 
-    // Direction
-    document.getElementById("direction").textContent = state.direction === 1 ? "\u27F3" : "\u27F2";
+    function makeOppHtml(opp, arrowChar) {
+      var isActive = (opp.index === state.currentPlayerIndex);
+      var html = '<div class="opp' + (isActive ? ' active-turn' : '') + '">';
+      html += '<div class="opp-name">' + escapeHtml(opp.player.name) + '</div>';
+      html += '<div class="opp-cards">' + opp.player.cardCount + ' card' + (opp.player.cardCount !== 1 ? 's' : '') + '</div>';
+      html += '<div class="turn-arrow">' + arrowChar + '</div>';
+      html += '</div>';
+      return html;
+    }
+
+    var topEl = document.getElementById("opp-top");
+    var leftEl = document.getElementById("opp-left");
+    var rightEl = document.getElementById("opp-right");
+    topEl.innerHTML = "";
+    leftEl.innerHTML = "";
+    rightEl.innerHTML = "";
+
+    if (opponents.length === 1) {
+      // 2 players: one across
+      topEl.innerHTML = makeOppHtml(opponents[0], "\u2193");
+    } else if (opponents.length === 2) {
+      // 3 players: one left, one across
+      leftEl.innerHTML = makeOppHtml(opponents[0], "\u2192");
+      topEl.innerHTML = makeOppHtml(opponents[1], "\u2193");
+    } else if (opponents.length === 3) {
+      // 4 players: one left, one across, one right
+      leftEl.innerHTML = makeOppHtml(opponents[0], "\u2192");
+      topEl.innerHTML = makeOppHtml(opponents[1], "\u2193");
+      rightEl.innerHTML = makeOppHtml(opponents[2], "\u2190");
+    }
+
+    // Direction — show flow around the table
+    var dirEl = document.getElementById("direction");
+    dirEl.textContent = state.direction === 1 ? "\u27F3" : "\u27F2";
 
     // Turn message + my turn arrow
     var turnEl = document.getElementById("turn-msg");
