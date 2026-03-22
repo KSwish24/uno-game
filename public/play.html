@@ -137,7 +137,6 @@ body {
 .hand { display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 8px 4px; gap: 6px; justify-content: center; }
 .hand.many-cards { justify-content: flex-start; }
 .card { width: 60px; height: 90px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.15); cursor: pointer; -webkit-user-select: none; user-select: none; position: relative; transition: transform 0.15s, box-shadow 0.15s; }
-.card:active { transform: scale(0.93) !important; }
 .card.playable { transform: translateY(-8px); border-color: rgba(255,255,255,0.5); box-shadow: 0 4px 12px rgba(255,255,255,0.15); }
 .card.not-playable { opacity: 0.45; cursor: default; }
 .card .card-value { font-size: 22px; line-height: 1; }
@@ -687,7 +686,7 @@ body {
     container.className = "fireworks active";
     var colors = ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6", "#ec4899", "#8b5cf6", "#f97316", "#14b8a6", "#fbbf24", "#a78bfa", "#fb923c", "#34d399", "#f472b6", "#60a5fa"];
     var burst = 0;
-    var maxBursts = 40;
+    var maxBursts = 80;
     var ww = window.innerWidth;
     var wh = window.innerHeight;
 
@@ -699,11 +698,11 @@ body {
       }
       burst++;
       // Multiple simultaneous bursts
-      var simultaneous = 1 + Math.floor(Math.random() * 3);
+      var simultaneous = 2 + Math.floor(Math.random() * 4);
       for (var s = 0; s < simultaneous; s++) {
         var cx = Math.random() * ww;
         var cy = Math.random() * wh * 0.7 + 30;
-        var particles = 35 + Math.floor(Math.random() * 30);
+        var particles = 50 + Math.floor(Math.random() * 50);
         var burstColor = colors[Math.floor(Math.random() * colors.length)];
         var useRainbow = Math.random() > 0.5;
         for (var i = 0; i < particles; i++) {
@@ -734,11 +733,11 @@ body {
     }
 
     function doSecondWave(count) {
-      if (count >= 20) {
+      if (count >= 40) {
         // Final grand finale — massive burst from center
         var fcx = ww / 2;
         var fcy = wh / 2;
-        for (var i = 0; i < 100; i++) {
+        for (var i = 0; i < 200; i++) {
           var dot = document.createElement("div");
           var angle = Math.random() * Math.PI * 2;
           var dist = 80 + Math.random() * 250;
@@ -750,7 +749,7 @@ body {
           container.appendChild(dot);
           animateParticle(dot, dx, dy, 1200 + Math.random() * 800);
         }
-        setTimeout(function() { container.className = "fireworks"; container.innerHTML = ""; }, 3000);
+        setTimeout(function() { container.className = "fireworks"; container.innerHTML = ""; }, 5000);
         return;
       }
       // Scattered bursts across the screen
@@ -847,7 +846,10 @@ body {
     actionInFlight = true;
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
+    xhr.timeout = 5000;
     xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.ontimeout = function() { actionInFlight = false; showToast("Request timed out"); };
+    xhr.onerror = function() { actionInFlight = false; showToast("Network error"); };
     xhr.onreadystatechange = function() {
       if (xhr.readyState !== 4) return;
       actionInFlight = false;
