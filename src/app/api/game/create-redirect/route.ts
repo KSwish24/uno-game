@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
       updatedAt: Date.now(),
     });
 
-    return NextResponse.redirect(new URL(`/play.html?code=${code}&pid=${playerId}`, request.url));
+    return NextResponse.redirect(new URL(`/play.html?code=${code}&pid=${playerId}`, request.url), 303);
   } catch {
-    return NextResponse.redirect(new URL("/create?error=unknown", request.url));
+    return NextResponse.redirect(new URL("/create?error=unknown", request.url), 303);
   }
 }

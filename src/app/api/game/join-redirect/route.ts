@@ -10,24 +10,24 @@ export async function POST(request: NextRequest) {
     const code = (formData.get("code") as string)?.toUpperCase().trim();
 
     if (!playerName?.trim() || !code) {
-      return NextResponse.redirect(new URL("/join?error=missing", request.url));
+      return NextResponse.redirect(new URL("/join?error=missing", request.url), 303);
     }
 
     const game = await getGame(code);
     if (!game) {
-      return NextResponse.redirect(new URL("/join?error=notfound", request.url));
+      return NextResponse.redirect(new URL("/join?error=notfound", request.url), 303);
     }
     if (game.status !== "lobby") {
-      return NextResponse.redirect(new URL("/join?error=started", request.url));
+      return NextResponse.redirect(new URL("/join?error=started", request.url), 303);
     }
     if (game.players.length >= 4) {
-      return NextResponse.redirect(new URL("/join?error=full", request.url));
+      return NextResponse.redirect(new URL("/join?error=full", request.url), 303);
     }
 
     // Check if rejoining
     const existing = game.players.find(p => p.name.toLowerCase() === playerName.trim().toLowerCase());
     if (existing) {
-      return NextResponse.redirect(new URL(`/play.html?code=${code}&pid=${existing.id}`, request.url));
+      return NextResponse.redirect(new URL("/play.html?code=" + code + "&pid=" + existing.id, request.url), 303);
     }
 
     const playerId = crypto.randomUUID();
@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
     });
     await setGame(game);
 
-    return NextResponse.redirect(new URL(`/play.html?code=${code}&pid=${playerId}`, request.url));
+    return NextResponse.redirect(new URL("/play.html?code=" + code + "&pid=" + playerId, request.url), 303);
   } catch {
-    return NextResponse.redirect(new URL("/join?error=unknown", request.url));
+    return NextResponse.redirect(new URL("/join?error=unknown", request.url), 303);
   }
 }
