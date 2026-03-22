@@ -18,6 +18,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: err }, { status: 400 });
     }
 
+    // Check if round was won — track wins and check for match winner
+    if (game.status === "finished" && game.winner) {
+      if (!game.wins) game.wins = {};
+      game.wins[game.winner] = (game.wins[game.winner] || 0) + 1;
+
+      var gtw = game.gamesToWin || 1;
+      if (game.wins[game.winner] >= gtw) {
+        game.matchWinner = game.winner;
+      }
+    }
+
     await setGame(game);
     return NextResponse.json({ success: true });
   } catch {

@@ -46,6 +46,9 @@ export async function POST(request: NextRequest) {
       lastActionTime: Date.now(),
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      gamesToWin: 1,
+      wins: {},
+      matchWinner: null,
     });
 
     return NextResponse.redirect(new URL(`/play.html?code=${code}&pid=${playerId}`, request.url), 303);

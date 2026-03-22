@@ -99,6 +99,9 @@ export function createGame(hostId: string, hostName: string): GameState {
     mustDraw: 0,
     createdAt: Date.now(),
     updatedAt: Date.now(),
+    gamesToWin: 1,
+    wins: {},
+    matchWinner: null,
   };
 }
 
@@ -411,6 +414,9 @@ export function getPlayerView(
     mustDraw: game.mustDraw,
     deckCount: game.deck.length,
     updatedAt: game.updatedAt,
+    gamesToWin: game.gamesToWin || 1,
+    wins: game.wins || {},
+    matchWinner: game.matchWinner || null,
   };
 }
 

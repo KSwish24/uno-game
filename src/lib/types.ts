@@ -37,12 +37,15 @@ export interface GameState {
   currentPlayerIndex: number;
   direction: Direction;
   currentColor: Color | null;
-  winner: string | null;
+  winner: string | null; // round winner
   lastAction: string | null;
   lastActionTime: number;
-  mustDraw: number; // how many cards the current player must draw (for draw2/wild4 stacking)
+  mustDraw: number;
   createdAt: number;
   updatedAt: number;
+  gamesToWin: number; // how many rounds to win the match (default 1)
+  wins: Record<string, number>; // playerId -> win count
+  matchWinner: string | null; // player who reached gamesToWin
 }
 
 // What a specific player sees (hides other players' cards)
@@ -69,4 +72,7 @@ export interface PlayerView {
   mustDraw: number;
   deckCount: number;
   updatedAt: number;
+  gamesToWin: number;
+  wins: Record<string, number>;
+  matchWinner: string | null;
 }

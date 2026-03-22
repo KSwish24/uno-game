@@ -37,19 +37,40 @@ body {
 .player-list { list-style: none; margin: 24px 0; }
 .player-list li { padding: 12px 16px; background: #111827; border: 1px solid #1f2937; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; }
 .player-list .host-badge { background: #f59e0b; color: #000; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px; margin-left: 8px; }
+.player-list .win-count { color: #22c55e; font-size: 12px; font-weight: 700; margin-left: auto; }
 .player-list .player-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; margin-right: 12px; flex-shrink: 0; }
 .btn-start { background: #dc2626; max-width: 320px; margin: 0 auto; }
 .btn-start:disabled { opacity: 0.5; cursor: not-allowed; }
 .lobby-wait { color: #6b7280; font-size: 14px; text-align: center; margin-top: 16px; }
 
+/* Games to win selector */
+.gtw-selector { text-align: center; margin: 16px 0; }
+.gtw-selector label { display: block; font-size: 13px; color: #9ca3af; margin-bottom: 8px; }
+.gtw-options { display: flex; justify-content: center; gap: 8px; }
+.gtw-btn { width: 48px; height: 48px; border-radius: 12px; border: 2px solid #374151; background: #111827; color: #fff; font-size: 18px; font-weight: 700; cursor: pointer; }
+.gtw-btn.active { border-color: #f59e0b; background: #1c1917; color: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.3); }
+
 /* Game Board */
 .screen-game { padding: 8px; padding-bottom: 0; }
 .opponents { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; padding: 4px 0; gap: 6px; }
-.opp { background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 6px 12px; font-size: 13px; text-align: center; min-width: 80px; }
-.opp.active-turn { border-color: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+.opp { background: #111827; border: 2px solid #1f2937; border-radius: 10px; padding: 6px 12px; font-size: 13px; text-align: center; min-width: 80px; position: relative; }
+.opp.active-turn { border-color: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.5); }
 .opp .opp-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
 .opp .opp-cards { color: #9ca3af; font-size: 11px; margin-top: 2px; }
 .opp .uno-badge { color: #ef4444; font-weight: 700; font-size: 10px; }
+.opp .turn-arrow { display: none; position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 18px; color: #f59e0b; animation: bounceArrow 0.6s ease-in-out infinite alternate; }
+.opp.active-turn .turn-arrow { display: block; }
+@-webkit-keyframes bounceArrow { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(4px); } }
+@keyframes bounceArrow { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(4px); } }
+
+/* Your turn arrow */
+.my-turn-arrow { display: none; font-size: 24px; color: #22c55e; text-align: center; animation: bounceArrow 0.6s ease-in-out infinite alternate; margin-bottom: 2px; }
+.my-turn-arrow.active { display: block; }
+
+/* Scoreboard bar */
+.scoreboard { width: 100%; display: flex; justify-content: center; gap: 12px; padding: 6px 8px; background: #0a0f1a; border-bottom: 1px solid #1f2937; font-size: 11px; color: #9ca3af; }
+.scoreboard .score-item { display: flex; align-items: center; gap: 4px; }
+.scoreboard .score-wins { color: #22c55e; font-weight: 700; }
 
 /* Center area */
 .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 8px 0; position: relative; }
@@ -100,8 +121,6 @@ body {
 .card-green { background: #22c55e; color: #fff; }
 .card-yellow { background: #eab308; color: #000; }
 .card-wild { background: #1f2937; color: #fff; border-color: #6b7280; }
-
-/* Wild card diamond */
 .wild-diamond { display: flex; flex-wrap: wrap; width: 24px; height: 24px; }
 .wild-diamond span { width: 12px; height: 12px; }
 .wd-r { background: #ef4444; border-radius: 2px 0 0 0; }
@@ -109,18 +128,29 @@ body {
 .wd-g { background: #22c55e; border-radius: 0 0 0 2px; }
 .wd-y { background: #eab308; border-radius: 0 0 2px 0; }
 
-/* Game over */
-.game-over { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 200; flex-direction: column; align-items: center; justify-content: center; }
+/* Round Over overlay */
+.game-over { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); z-index: 200; flex-direction: column; align-items: center; justify-content: center; }
 .game-over.active { display: flex; }
 .game-over-title { font-size: 48px; font-weight: 900; margin-bottom: 8px; }
-.game-over-sub { font-size: 18px; color: #9ca3af; margin-bottom: 32px; }
-.btn-home { background: #1f2937; display: inline-block; padding: 14px 32px; border-radius: 12px; text-decoration: none; color: #fff; font-weight: 700; font-size: 16px; border: 1px solid #374151; }
+.game-over-sub { font-size: 18px; color: #9ca3af; margin-bottom: 12px; }
+.game-over-score { font-size: 14px; color: #d1d5db; margin-bottom: 24px; text-align: center; line-height: 1.8; }
+.btn-home { background: #1f2937; display: inline-block; padding: 14px 32px; border-radius: 12px; text-decoration: none; color: #fff; font-weight: 700; font-size: 16px; border: 1px solid #374151; margin: 4px; }
+.btn-next-round { background: #dc2626; display: inline-block; padding: 14px 32px; border-radius: 12px; color: #fff; font-weight: 700; font-size: 16px; border: none; cursor: pointer; margin: 4px; }
+
+/* Fireworks / Celebration */
+.fireworks { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 250; pointer-events: none; overflow: hidden; }
+.fireworks.active { display: block; }
+.firework { position: absolute; width: 6px; height: 6px; border-radius: 50%; animation: fireworkShoot 1s ease-out forwards; }
+@-webkit-keyframes fireworkShoot { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.3) translateY(-80px); } }
+@keyframes fireworkShoot { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.3) translateY(-80px); } }
+.champion-title { font-size: 56px; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6, #3b82f6, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; animation: champPulse 1s ease-in-out infinite alternate; }
+@-webkit-keyframes champPulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+@keyframes champPulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 
 /* Error toast */
 .toast { display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #dc2626; color: #fff; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; z-index: 300; max-width: 90%; text-align: center; }
 .toast.active { display: block; }
 
-/* Desktop sizes */
 @media (min-width: 600px) {
   .card { width: 80px; height: 120px; border-radius: 10px; }
   .card .card-value { font-size: 30px; }
@@ -156,6 +186,15 @@ body {
     <div id="lobby-code" class="lobby-code"></div>
     <div class="lobby-label">Players</div>
     <ul id="lobby-players" class="player-list"></ul>
+    <div id="gtw-selector" class="gtw-selector" style="display:none;">
+      <label>Games to Win</label>
+      <div class="gtw-options">
+        <button class="gtw-btn active" onclick="setGamesToWin(1)" id="gtw-1">1</button>
+        <button class="gtw-btn" onclick="setGamesToWin(2)" id="gtw-2">2</button>
+        <button class="gtw-btn" onclick="setGamesToWin(3)" id="gtw-3">3</button>
+        <button class="gtw-btn" onclick="setGamesToWin(5)" id="gtw-5">5</button>
+      </div>
+    </div>
     <button id="btn-start" class="btn btn-start" style="display:none;" onclick="startGame()">Start Game</button>
     <div id="lobby-wait" class="lobby-wait" style="display:none;">Waiting for host to start...</div>
   </div>
@@ -163,9 +202,11 @@ body {
 
 <!-- Game Screen -->
 <div id="screen-game" class="screen screen-game">
+  <div id="scoreboard" class="scoreboard" style="display:none;"></div>
   <div id="opponents" class="opponents"></div>
   <div class="center">
     <div id="direction" class="direction-indicator"></div>
+    <div id="my-turn-arrow" class="my-turn-arrow">&darr;</div>
     <div id="turn-msg" class="turn-msg"></div>
     <div class="pile-area">
       <div id="top-card" class="top-card"></div>
@@ -197,19 +238,22 @@ body {
 <!-- UNO button -->
 <button id="uno-btn" class="uno-btn" onclick="callUno()">UNO!</button>
 
-<!-- Game Over -->
+<!-- Round / Match Over -->
 <div id="game-over" class="game-over">
   <div id="game-over-title" class="game-over-title"></div>
   <div id="game-over-sub" class="game-over-sub"></div>
-  <a href="/" class="btn-home">Back to Home</a>
+  <div id="game-over-score" class="game-over-score"></div>
+  <div id="game-over-buttons"></div>
 </div>
+
+<!-- Fireworks container -->
+<div id="fireworks" class="fireworks"></div>
 
 <!-- Error toast -->
 <div id="toast" class="toast"></div>
 
 <script>
 (function() {
-  // State
   var gameCode = null;
   var playerId = null;
   var lastUpdatedAt = 0;
@@ -218,8 +262,9 @@ body {
   var pollTimer = null;
   var toastTimer = null;
   var actionInFlight = false;
+  var selectedGamesToWin = 1;
+  var celebrationDone = false;
 
-  // Parse query params
   function getParams() {
     var search = window.location.search;
     var params = {};
@@ -227,14 +272,11 @@ body {
     var parts = search.substring(1).split("&");
     for (var i = 0; i < parts.length; i++) {
       var kv = parts[i].split("=");
-      if (kv.length === 2) {
-        params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
-      }
+      if (kv.length === 2) params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
     }
     return params;
   }
 
-  // Init
   var params = getParams();
   if (params.code && params.pid) {
     gameCode = params.code;
@@ -259,16 +301,10 @@ body {
     t.textContent = msg;
     t.className = "toast active";
     if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(function() {
-      t.className = "toast";
-    }, 3000);
+    toastTimer = setTimeout(function() { t.className = "toast"; }, 3000);
   }
 
-  // Polling
-  function startPolling() {
-    poll();
-    pollTimer = setInterval(poll, 800);
-  }
+  function startPolling() { poll(); pollTimer = setInterval(poll, 800); }
 
   function poll() {
     var xhr = new XMLHttpRequest();
@@ -283,9 +319,7 @@ body {
             currentState = data;
             render(data);
           }
-        } catch (e) {
-          // ignore parse errors
-        }
+        } catch (e) {}
       } else if (xhr.status === 404) {
         showToast("Game not found");
         if (pollTimer) clearInterval(pollTimer);
@@ -294,14 +328,17 @@ body {
     xhr.send();
   }
 
-  // Render
   function render(state) {
     if (state.status === "lobby") {
       showScreen("lobby");
       renderLobby(state);
+      celebrationDone = false;
+      document.getElementById("game-over").className = "game-over";
+      document.getElementById("fireworks").className = "fireworks";
     } else if (state.status === "playing") {
       showScreen("game");
       renderGame(state);
+      document.getElementById("game-over").className = "game-over";
     } else if (state.status === "finished") {
       showScreen("game");
       renderGame(state);
@@ -313,29 +350,51 @@ body {
     document.getElementById("lobby-code").textContent = state.code;
     var list = document.getElementById("lobby-players");
     var html = "";
+    var wins = state.wins || {};
     for (var i = 0; i < state.players.length; i++) {
       var p = state.players[i];
+      var w = wins[p.id] || 0;
       html += '<li><span class="player-dot"></span>' + escapeHtml(p.name);
-      if (p.id === state.hostId) {
-        html += '<span class="host-badge">HOST</span>';
-      }
+      if (p.id === state.hostId) html += '<span class="host-badge">HOST</span>';
+      if (w > 0) html += '<span class="win-count">' + w + ' win' + (w > 1 ? 's' : '') + '</span>';
       html += '</li>';
     }
     list.innerHTML = html;
 
     var btnStart = document.getElementById("btn-start");
     var lobbyWait = document.getElementById("lobby-wait");
+    var gtwSelector = document.getElementById("gtw-selector");
     if (state.myId === state.hostId) {
       btnStart.style.display = "block";
       lobbyWait.style.display = "none";
+      gtwSelector.style.display = "block";
       btnStart.disabled = state.players.length < 2;
     } else {
       btnStart.style.display = "none";
+      gtwSelector.style.display = "none";
       lobbyWait.style.display = "block";
     }
   }
 
   function renderGame(state) {
+    // Scoreboard (if gamesToWin > 1)
+    var gtw = state.gamesToWin || 1;
+    var sbEl = document.getElementById("scoreboard");
+    var wins = state.wins || {};
+    if (gtw > 1) {
+      sbEl.style.display = "flex";
+      var sbHtml = "First to " + gtw + ": ";
+      for (var i = 0; i < state.players.length; i++) {
+        var p = state.players[i];
+        var w = wins[p.id] || 0;
+        sbHtml += '<span class="score-item">' + escapeHtml(p.name) + ' <span class="score-wins">' + w + '</span></span>';
+        if (i < state.players.length - 1) sbHtml += " &middot; ";
+      }
+      sbEl.innerHTML = sbHtml;
+    } else {
+      sbEl.style.display = "none";
+    }
+
     // Opponents
     var oppHtml = "";
     var myIndex = -1;
@@ -349,30 +408,33 @@ body {
       oppHtml += '<div class="opp' + (isActive ? ' active-turn' : '') + '">';
       oppHtml += '<div class="opp-name">' + escapeHtml(p.name) + '</div>';
       oppHtml += '<div class="opp-cards">' + p.cardCount + ' card' + (p.cardCount !== 1 ? 's' : '');
-      if (p.calledUno && p.cardCount <= 2) {
-        oppHtml += ' <span class="uno-badge">UNO!</span>';
-      }
-      oppHtml += '</div></div>';
+      if (p.calledUno && p.cardCount <= 2) oppHtml += ' <span class="uno-badge">UNO!</span>';
+      oppHtml += '</div>';
+      oppHtml += '<div class="turn-arrow">&darr;</div>';
+      oppHtml += '</div>';
     }
     document.getElementById("opponents").innerHTML = oppHtml;
 
     // Direction
-    var dirEl = document.getElementById("direction");
-    dirEl.textContent = state.direction === 1 ? "\u27F3" : "\u27F2";
+    document.getElementById("direction").textContent = state.direction === 1 ? "\u27F3" : "\u27F2";
 
-    // Turn message
+    // Turn message + my turn arrow
     var turnEl = document.getElementById("turn-msg");
+    var myArrow = document.getElementById("my-turn-arrow");
     var isMyTurn = (myIndex === state.currentPlayerIndex);
     if (state.status === "finished") {
       turnEl.textContent = "";
       turnEl.className = "turn-msg";
+      myArrow.className = "my-turn-arrow";
     } else if (isMyTurn) {
       turnEl.textContent = "Your turn!";
       turnEl.className = "turn-msg my-turn";
+      myArrow.className = "my-turn-arrow active";
     } else {
-      var currentPlayer = state.players[state.currentPlayerIndex];
-      turnEl.textContent = currentPlayer ? (escapeHtml(currentPlayer.name) + "'s turn") : "";
+      var cp = state.players[state.currentPlayerIndex];
+      turnEl.textContent = cp ? (escapeHtml(cp.name) + "'s turn") : "";
       turnEl.className = "turn-msg not-my-turn";
+      myArrow.className = "my-turn-arrow";
     }
 
     // Top card
@@ -388,16 +450,13 @@ body {
     // Color indicator
     var colorEl = document.getElementById("color-indicator");
     if (state.currentColor) {
-      var cc = getColorHex(state.currentColor);
-      colorEl.innerHTML = '<div class="color-dot" style="background:' + cc + ';"></div>';
+      colorEl.innerHTML = '<div class="color-dot" style="background:' + getColorHex(state.currentColor) + ';"></div>';
     } else {
       colorEl.innerHTML = "";
     }
 
-    // Draw pile
     document.getElementById("deck-count").textContent = state.deckCount;
 
-    // Must draw message
     var mdEl = document.getElementById("must-draw-msg");
     if (state.mustDraw > 0 && isMyTurn) {
       mdEl.textContent = "You must draw " + state.mustDraw + " card" + (state.mustDraw > 1 ? "s" : "") + "!";
@@ -405,9 +464,7 @@ body {
       mdEl.textContent = "";
     }
 
-    // Last action
-    var laEl = document.getElementById("last-action");
-    laEl.textContent = state.lastAction || "";
+    document.getElementById("last-action").textContent = state.lastAction || "";
 
     // Hand
     var handEl = document.getElementById("hand");
@@ -415,27 +472,19 @@ body {
     var playableIds = {};
     if (isMyTurn && state.status === "playing") {
       var playable = getPlayableCards(state);
-      for (var i = 0; i < playable.length; i++) {
-        playableIds[playable[i]] = true;
-      }
+      for (var i = 0; i < playable.length; i++) playableIds[playable[i]] = true;
     }
     for (var i = 0; i < state.myHand.length; i++) {
       var card = state.myHand[i];
       var canPlay = playableIds[card.id] === true;
       var cls = "card card-" + card.color;
-      if (isMyTurn && state.status === "playing") {
-        cls += canPlay ? " playable" : " not-playable";
-      }
+      if (isMyTurn && state.status === "playing") cls += canPlay ? " playable" : " not-playable";
       handHtml += '<div class="' + cls + '" data-card-id="' + card.id + '" onclick="window._playCard(\'' + card.id + '\')">';
       handHtml += renderCardInner(card);
       handHtml += '</div>';
     }
     handEl.innerHTML = handHtml;
-    if (state.myHand.length > 6) {
-      handEl.className = "hand many-cards";
-    } else {
-      handEl.className = "hand";
-    }
+    handEl.className = state.myHand.length > 6 ? "hand many-cards" : "hand";
 
     // UNO button
     var unoBtn = document.getElementById("uno-btn");
@@ -452,43 +501,145 @@ body {
     overlay.className = "game-over active";
     var winnerName = "";
     for (var i = 0; i < state.players.length; i++) {
-      if (state.players[i].id === state.winner) {
-        winnerName = state.players[i].name;
-        break;
-      }
+      if (state.players[i].id === state.winner) { winnerName = state.players[i].name; break; }
     }
     var titleEl = document.getElementById("game-over-title");
     var subEl = document.getElementById("game-over-sub");
-    if (state.winner === state.myId) {
-      titleEl.textContent = "YOU WIN!";
-      titleEl.style.color = "#22c55e";
-      subEl.textContent = "Congratulations!";
+    var scoreEl = document.getElementById("game-over-score");
+    var btnsEl = document.getElementById("game-over-buttons");
+
+    var gtw = state.gamesToWin || 1;
+    var wins = state.wins || {};
+    var isMatchOver = state.matchWinner !== null && state.matchWinner !== undefined;
+
+    if (isMatchOver) {
+      // MATCH WINNER — celebration!
+      var champName = "";
+      for (var i = 0; i < state.players.length; i++) {
+        if (state.players[i].id === state.matchWinner) { champName = state.players[i].name; break; }
+      }
+      if (state.matchWinner === state.myId) {
+        titleEl.innerHTML = '<span class="champion-title">CHAMPION!</span>';
+        subEl.textContent = "You won the match!";
+      } else {
+        titleEl.innerHTML = '<span class="champion-title">' + escapeHtml(champName) + '</span>';
+        subEl.textContent = "wins the match!";
+      }
+      // Score summary
+      var scoreHtml = "";
+      for (var i = 0; i < state.players.length; i++) {
+        var p = state.players[i];
+        var w = wins[p.id] || 0;
+        scoreHtml += escapeHtml(p.name) + ": " + w + " win" + (w !== 1 ? "s" : "") + "<br>";
+      }
+      scoreEl.innerHTML = scoreHtml;
+      btnsEl.innerHTML = '<a href="/" class="btn-home">Back to Home</a>';
+
+      // Fire the celebration!
+      if (!celebrationDone) {
+        celebrationDone = true;
+        launchFireworks();
+      }
     } else {
-      titleEl.textContent = escapeHtml(winnerName) + " wins!";
-      titleEl.style.color = "#f59e0b";
-      subEl.textContent = "Better luck next time";
+      // Round over, more rounds to play
+      if (state.winner === state.myId) {
+        titleEl.textContent = "YOU WIN THIS ROUND!";
+        titleEl.style.color = "#22c55e";
+      } else {
+        titleEl.textContent = escapeHtml(winnerName) + " wins this round!";
+        titleEl.style.color = "#f59e0b";
+      }
+
+      if (gtw > 1) {
+        var scoreHtml = "Score: ";
+        for (var i = 0; i < state.players.length; i++) {
+          var p = state.players[i];
+          var w = wins[p.id] || 0;
+          if (i > 0) scoreHtml += " &middot; ";
+          scoreHtml += escapeHtml(p.name) + " " + w + "/" + gtw;
+        }
+        subEl.innerHTML = scoreHtml;
+      } else {
+        subEl.textContent = "Congratulations!";
+      }
+      scoreEl.innerHTML = "";
+
+      if (state.myId === state.hostId && gtw > 1) {
+        btnsEl.innerHTML = '<button class="btn-next-round" onclick="nextRound()">Next Round</button> <a href="/" class="btn-home">End Match</a>';
+      } else if (state.myId === state.hostId) {
+        btnsEl.innerHTML = '<a href="/" class="btn-home">Back to Home</a>';
+      } else if (gtw > 1) {
+        btnsEl.innerHTML = '<div style="color:#6b7280;font-size:14px;">Waiting for host to start next round...</div>';
+      } else {
+        btnsEl.innerHTML = '<a href="/" class="btn-home">Back to Home</a>';
+      }
     }
   }
 
-  function renderCardInner(card) {
-    var val = "";
-    var label = "";
-    if (card.type === "number") {
-      val = String(card.value);
-    } else if (card.type === "skip") {
-      val = "\u2298";
-      label = "SKIP";
-    } else if (card.type === "reverse") {
-      val = "\u21C4";
-      label = "REV";
-    } else if (card.type === "draw2") {
-      val = "+2";
-      label = "DRAW";
-    } else if (card.type === "wild") {
-      return '<div class="wild-diamond"><span class="wd-r"></span><span class="wd-b"></span><span class="wd-g"></span><span class="wd-y"></span></div><div class="card-label">WILD</div>';
-    } else if (card.type === "wild4") {
-      return '<div class="card-value">+4</div><div class="card-label">WILD</div>';
+  function launchFireworks() {
+    var container = document.getElementById("fireworks");
+    container.className = "fireworks active";
+    var colors = ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6", "#ec4899", "#8b5cf6", "#f97316", "#14b8a6"];
+    var burst = 0;
+    var maxBursts = 12;
+
+    function doBurst() {
+      if (burst >= maxBursts) {
+        setTimeout(function() { container.className = "fireworks"; container.innerHTML = ""; }, 2000);
+        return;
+      }
+      burst++;
+      var cx = Math.random() * window.innerWidth;
+      var cy = Math.random() * window.innerHeight * 0.6 + 50;
+      var particles = 20 + Math.floor(Math.random() * 15);
+      for (var i = 0; i < particles; i++) {
+        var dot = document.createElement("div");
+        dot.className = "firework";
+        var angle = (Math.PI * 2 * i) / particles;
+        var dist = 40 + Math.random() * 80;
+        var dx = Math.cos(angle) * dist;
+        var dy = Math.sin(angle) * dist;
+        var c = colors[Math.floor(Math.random() * colors.length)];
+        var size = 4 + Math.floor(Math.random() * 5);
+        dot.style.cssText = "left:" + cx + "px;top:" + cy + "px;width:" + size + "px;height:" + size + "px;background:" + c + ";animation:none;";
+        container.appendChild(dot);
+        animateParticle(dot, dx, dy);
+      }
+      setTimeout(doBurst, 400 + Math.random() * 300);
     }
+
+    function animateParticle(el, dx, dy) {
+      var startX = parseFloat(el.style.left);
+      var startY = parseFloat(el.style.top);
+      var start = Date.now();
+      var duration = 800 + Math.random() * 400;
+      function step() {
+        var elapsed = Date.now() - start;
+        var progress = Math.min(elapsed / duration, 1);
+        var ease = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + dx * ease) + "px";
+        el.style.top = (startY + dy * ease + progress * progress * 60) + "px";
+        el.style.opacity = String(1 - progress);
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    doBurst();
+  }
+
+  function renderCardInner(card) {
+    var val = "", label = "";
+    if (card.type === "number") { val = String(card.value); }
+    else if (card.type === "skip") { val = "\u2298"; label = "SKIP"; }
+    else if (card.type === "reverse") { val = "\u21C4"; label = "REV"; }
+    else if (card.type === "draw2") { val = "+2"; label = "DRAW"; }
+    else if (card.type === "wild") { return '<div class="wild-diamond"><span class="wd-r"></span><span class="wd-b"></span><span class="wd-g"></span><span class="wd-y"></span></div><div class="card-label">WILD</div>'; }
+    else if (card.type === "wild4") { return '<div class="card-value">+4</div><div class="card-label">WILD</div>'; }
     var html = '<div class="card-value">' + val + '</div>';
     if (label) html += '<div class="card-label">' + label + '</div>';
     return html;
@@ -497,30 +648,19 @@ body {
   function getPlayableCards(state) {
     var result = [];
     if (state.mustDraw > 0) {
-      // When must draw, can only play matching draw cards to stack, or must draw
       for (var i = 0; i < state.myHand.length; i++) {
         var c = state.myHand[i];
-        if (state.mustDraw > 0 && c.type === "draw2" && state.topCard && state.topCard.type === "draw2") {
-          result.push(c.id);
-        } else if (state.mustDraw > 0 && c.type === "wild4") {
-          result.push(c.id);
-        }
+        if (c.type === "draw2" && state.topCard && state.topCard.type === "draw2") result.push(c.id);
+        else if (c.type === "wild4") result.push(c.id);
       }
       return result;
     }
     for (var i = 0; i < state.myHand.length; i++) {
       var c = state.myHand[i];
-      if (c.color === "wild") {
-        result.push(c.id);
-      } else if (state.currentColor && c.color === state.currentColor) {
-        result.push(c.id);
-      } else if (state.topCard && c.type === state.topCard.type && c.type === "number" && c.value === state.topCard.value) {
-        result.push(c.id);
-      } else if (state.topCard && c.type !== "number" && c.type === state.topCard.type) {
-        result.push(c.id);
-      } else if (state.topCard && c.type === "number" && state.topCard.type === "number" && c.value === state.topCard.value) {
-        result.push(c.id);
-      }
+      if (c.color === "wild") { result.push(c.id); }
+      else if (state.currentColor && c.color === state.currentColor) { result.push(c.id); }
+      else if (state.topCard && c.type === "number" && state.topCard.type === "number" && c.value === state.topCard.value) { result.push(c.id); }
+      else if (state.topCard && c.type !== "number" && c.type === state.topCard.type) { result.push(c.id); }
     }
     return result;
   }
@@ -538,7 +678,6 @@ body {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
-  // Actions
   function apiPost(url, body, cb) {
     if (actionInFlight) return;
     actionInFlight = true;
@@ -549,16 +688,12 @@ body {
       if (xhr.readyState !== 4) return;
       actionInFlight = false;
       if (xhr.status >= 200 && xhr.status < 300) {
-        // Force an immediate poll to get fresh state
         lastUpdatedAt = 0;
         poll();
         if (cb) cb(null, JSON.parse(xhr.responseText));
       } else {
         var errMsg = "Action failed";
-        try {
-          var errData = JSON.parse(xhr.responseText);
-          if (errData.error) errMsg = errData.error;
-        } catch (e) {}
+        try { var errData = JSON.parse(xhr.responseText); if (errData.error) errMsg = errData.error; } catch (e) {}
         showToast(errMsg);
         if (cb) cb(errMsg);
       }
@@ -566,8 +701,22 @@ body {
     xhr.send(JSON.stringify(body));
   }
 
+  window.setGamesToWin = function(n) {
+    selectedGamesToWin = n;
+    var btns = document.querySelectorAll(".gtw-btn");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].className = "gtw-btn";
+    }
+    var active = document.getElementById("gtw-" + n);
+    if (active) active.className = "gtw-btn active";
+  };
+
   window.startGame = function() {
-    apiPost("/api/game/start", { code: gameCode, playerId: playerId });
+    apiPost("/api/game/start", { code: gameCode, playerId: playerId, gamesToWin: selectedGamesToWin });
+  };
+
+  window.nextRound = function() {
+    apiPost("/api/game/next-round", { code: gameCode, playerId: playerId });
   };
 
   window._playCard = function(cardId) {
@@ -578,29 +727,20 @@ body {
     }
     if (myIndex !== currentState.currentPlayerIndex) return;
     if (currentState.status !== "playing") return;
-
-    // Find the card
     var card = null;
     for (var i = 0; i < currentState.myHand.length; i++) {
       if (currentState.myHand[i].id === cardId) { card = currentState.myHand[i]; break; }
     }
     if (!card) return;
-
-    // Check if playable
     var playable = getPlayableCards(currentState);
     var isPlayable = false;
-    for (var i = 0; i < playable.length; i++) {
-      if (playable[i] === cardId) { isPlayable = true; break; }
-    }
+    for (var i = 0; i < playable.length; i++) { if (playable[i] === cardId) { isPlayable = true; break; } }
     if (!isPlayable) return;
-
-    // Wild cards need color picker
     if (card.color === "wild") {
       pendingWildCardId = cardId;
       document.getElementById("color-picker").className = "color-picker active";
       return;
     }
-
     apiPost("/api/game/play", { code: gameCode, playerId: playerId, cardId: cardId });
   };
 
