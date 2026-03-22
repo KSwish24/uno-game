@@ -160,7 +160,10 @@ export function startGame(game: GameState, requesterId: string): string | null {
   game.deck = deck;
   game.discardPile = [startCard];
   game.currentColor = startCard.color === "wild" ? "red" : startCard.color as Color;
-  game.currentPlayerIndex = 0;
+  // Keep currentPlayerIndex if set (winner of last round goes first)
+  if (game.currentPlayerIndex < 0 || game.currentPlayerIndex >= game.players.length) {
+    game.currentPlayerIndex = 0;
+  }
   game.direction = 1;
   game.status = "playing";
   game.mustDraw = 0;

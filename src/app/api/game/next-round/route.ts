@@ -25,11 +25,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Match is over" }, { status: 400 });
     }
 
+    // Remember who won so they go first next round
+    var winnerIndex = 0;
+    if (game.winner) {
+      for (var i = 0; i < game.players.length; i++) {
+        if (game.players[i].id === game.winner) { winnerIndex = i; break; }
+      }
+    }
+
     // Reset for next round — keep players, wins, gamesToWin
     game.status = "lobby";
     game.deck = shuffle(createDeck());
     game.discardPile = [];
-    game.currentPlayerIndex = 0;
+    game.currentPlayerIndex = winnerIndex;
     game.direction = 1;
     game.currentColor = null;
     game.winner = null;
