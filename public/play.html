@@ -258,7 +258,7 @@ body {
 </div>
 
 <!-- UNO button -->
-<button id="uno-btn" class="uno-btn" onclick="callUno()">UNO!</button>
+<!-- UNO call removed -->
 
 <!-- Round / Match Over -->
 <div id="game-over" class="game-over">
@@ -459,7 +459,6 @@ body {
       oppHtml += '<div class="opp' + (isActive ? ' active-turn' : '') + '">';
       oppHtml += '<div class="opp-name">' + escapeHtml(p.name) + '</div>';
       oppHtml += '<div class="opp-cards">' + p.cardCount + ' card' + (p.cardCount !== 1 ? 's' : '');
-      if (p.calledUno && p.cardCount <= 2) oppHtml += ' <span class="uno-badge">UNO!</span>';
       oppHtml += '</div>';
       oppHtml += '<div class="turn-arrow">&darr;</div>';
       oppHtml += '</div>';
@@ -561,13 +560,6 @@ body {
     }
 
     // UNO button
-    var unoBtn = document.getElementById("uno-btn");
-    var myPlayer = state.players[myIndex];
-    if (state.status === "playing" && state.myHand.length === 2 && myPlayer && !myPlayer.calledUno) {
-      unoBtn.className = "uno-btn active";
-    } else {
-      unoBtn.className = "uno-btn";
-    }
   }
 
   function renderGameOver(state) {
@@ -837,10 +829,6 @@ body {
     apiPost("/api/game/draw", { code: gameCode, playerId: playerId });
   };
 
-  window.callUno = function() {
-    if (!currentState || actionInFlight) return;
-    apiPost("/api/game/uno", { code: gameCode, playerId: playerId });
-  };
 
 })();
 </script>
