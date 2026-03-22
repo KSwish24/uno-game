@@ -338,25 +338,19 @@ export function drawCard(
   const currentPlayer = game.players[game.currentPlayerIndex];
   if (currentPlayer.id !== playerId) return "Not your turn";
 
-  if (game.mustDraw > 0) {
-    // Forced draw
-    drawCards(game, currentPlayer, game.mustDraw);
-    game.lastAction = `${currentPlayer.name} drew ${game.mustDraw} cards`;
-    game.mustDraw = 0;
+  // Always draw exactly 1 card
+  drawCards(game, currentPlayer, 1);
+  game.lastAction = `${currentPlayer.name} drew a card`;
+  game.mustDraw = 0;
+
+  // Check if the last drawn card is playable
+  const drawnCard = currentPlayer.hand[currentPlayer.hand.length - 1];
+  if (!canPlayCard(game, drawnCard)) {
     advanceTurn(game);
+    game.lastAction += " and passed";
   } else {
-    // Voluntary draw (no playable card or choice)
-    drawCards(game, currentPlayer, 1);
-    game.lastAction = `${currentPlayer.name} drew a card`;
-    // After drawing, check if drawn card is playable — if not, skip turn
-    const drawnCard = currentPlayer.hand[currentPlayer.hand.length - 1];
-    if (!canPlayCard(game, drawnCard)) {
-      advanceTurn(game);
-      game.lastAction += " and passed";
-    } else {
-      // Player gets a chance to play the drawn card (stay on their turn)
-      game.lastAction += " (can play it)";
-    }
+    // Stay on their turn — can play the drawn card
+    game.lastAction += " (can play it)";
   }
 
   currentPlayer.calledUno = false;
