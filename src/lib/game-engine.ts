@@ -338,19 +338,24 @@ export function drawCard(
   const currentPlayer = game.players[game.currentPlayerIndex];
   if (currentPlayer.id !== playerId) return "Not your turn";
 
-  // Always draw exactly 1 card
-  drawCards(game, currentPlayer, 1);
-  game.lastAction = `${currentPlayer.name} drew a card`;
-  game.mustDraw = 0;
-
-  // Check if the last drawn card is playable
-  const drawnCard = currentPlayer.hand[currentPlayer.hand.length - 1];
-  if (!canPlayCard(game, drawnCard)) {
+  if (game.mustDraw > 0) {
+    // Penalty draw (draw2/wild4) — draw all at once, then pass
+    const count = game.mustDraw;
+    drawCards(game, currentPlayer, count);
+    game.lastAction = `${currentPlayer.name} drew ${count} cards`;
+    game.mustDraw = 0;
     advanceTurn(game);
-    game.lastAction += " and passed";
   } else {
-    // Stay on their turn — can play the drawn card
-    game.lastAction += " (can play it)";
+    // Voluntary draw — draw 1, play it if possible, otherwise pass
+    drawCards(game, currentPlayer, 1);
+    game.lastAction = `${currentPlayer.name} drew a card`;
+    const drawnCard = currentPlayer.hand[currentPlayer.hand.length - 1];
+    if (!canPlayCard(game, drawnCard)) {
+      advanceTurn(game);
+      game.lastAction += " and passed";
+    } else {
+      game.lastAction += " (can play it)";
+    }
   }
 
   currentPlayer.calledUno = false;
