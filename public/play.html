@@ -64,8 +64,27 @@ body {
 @keyframes bounceArrow { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(4px); } }
 
 /* Your turn arrow */
-.my-turn-arrow { display: none; font-size: 24px; color: #22c55e; text-align: center; animation: bounceArrow 0.6s ease-in-out infinite alternate; margin-bottom: 2px; }
+.my-turn-arrow { display: none; font-size: 48px; color: #22c55e; text-align: center; animation: bigBounceArrow 0.6s ease-in-out infinite alternate; padding: 4px 0; line-height: 1; }
 .my-turn-arrow.active { display: block; }
+@-webkit-keyframes bigBounceArrow { from { transform: translateY(0); } to { transform: translateY(10px); } }
+@keyframes bigBounceArrow { from { transform: translateY(0); } to { transform: translateY(10px); } }
+
+/* Auto-draw message */
+.auto-draw-msg { font-size: 15px; color: #f59e0b; font-weight: 700; text-align: center; padding: 4px 0; animation: drawPulse 0.5s ease-in-out infinite alternate; }
+@-webkit-keyframes drawPulse { from { opacity: 0.6; } to { opacity: 1; } }
+@keyframes drawPulse { from { opacity: 0.6; } to { opacity: 1; } }
+
+/* Draw pile stacked look */
+.draw-pile-wrapper { position: relative; width: 70px; height: 100px; }
+.draw-pile-stack { position: absolute; width: 70px; height: 100px; border-radius: 10px; background: #1a2030; border: 3px solid #2d3748; }
+.draw-pile-stack-1 { top: 4px; left: 4px; }
+.draw-pile-stack-2 { top: 2px; left: 2px; }
+.draw-pile { position: absolute; top: 0; left: 0; }
+
+/* Draw pile glow when must draw */
+.draw-pile-wrapper.must-draw .draw-pile { border-color: #f59e0b; box-shadow: 0 0 16px rgba(245,158,11,0.6); }
+.draw-pile-wrapper:not(.must-draw) .draw-pile { opacity: 0.6; cursor: default; }
+.draw-pile-wrapper:not(.must-draw) .draw-pile:active { transform: none; }
 
 /* Scoreboard bar */
 .scoreboard { width: 100%; display: flex; justify-content: center; gap: 12px; padding: 6px 8px; background: #0a0f1a; border-bottom: 1px solid #1f2937; font-size: 11px; color: #9ca3af; }
@@ -77,8 +96,7 @@ body {
 .direction-indicator { font-size: 20px; color: #6b7280; margin-bottom: 4px; }
 .pile-area { display: flex; align-items: center; justify-content: center; gap: 24px; margin: 8px 0; }
 .top-card { width: 70px; height: 100px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; border: 3px solid rgba(255,255,255,0.2); position: relative; }
-.draw-pile { width: 70px; height: 100px; border-radius: 10px; background: #1f2937; border: 3px solid #374151; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; -webkit-user-select: none; user-select: none; }
-.draw-pile:active { transform: scale(0.95); }
+.draw-pile { width: 70px; height: 100px; border-radius: 10px; background: #1f2937; border: 3px solid #374151; display: flex; flex-direction: column; align-items: center; justify-content: center; -webkit-user-select: none; user-select: none; }
 .draw-pile .deck-label { font-size: 11px; color: #9ca3af; margin-top: 4px; }
 .draw-pile .deck-count { font-size: 18px; font-weight: 700; }
 .color-dot { width: 20px; height: 20px; border-radius: 50%; margin: 4px auto 0; border: 2px solid rgba(255,255,255,0.3); }
@@ -157,6 +175,8 @@ body {
   .card .card-label { font-size: 11px; }
   .top-card { width: 90px; height: 130px; font-size: 28px; }
   .draw-pile { width: 90px; height: 130px; }
+  .draw-pile-wrapper { width: 90px; height: 130px; }
+  .draw-pile-stack { width: 90px; height: 130px; }
   .hand { gap: 8px; }
   .uno-btn { width: 80px; height: 80px; font-size: 20px; bottom: 240px; }
 }
@@ -206,19 +226,24 @@ body {
   <div id="opponents" class="opponents"></div>
   <div class="center">
     <div id="direction" class="direction-indicator"></div>
-    <div id="my-turn-arrow" class="my-turn-arrow">&darr;</div>
     <div id="turn-msg" class="turn-msg"></div>
     <div class="pile-area">
       <div id="top-card" class="top-card"></div>
-      <div id="draw-pile" class="draw-pile" onclick="drawCard()">
-        <div id="deck-count" class="deck-count"></div>
-        <div class="deck-label">DRAW</div>
+      <div id="draw-pile-wrapper" class="draw-pile-wrapper">
+        <div class="draw-pile-stack draw-pile-stack-1"></div>
+        <div class="draw-pile-stack draw-pile-stack-2"></div>
+        <div id="draw-pile" class="draw-pile">
+          <div id="deck-count" class="deck-count"></div>
+          <div class="deck-label">DRAW</div>
+        </div>
       </div>
     </div>
     <div id="color-indicator"></div>
     <div id="must-draw-msg" class="must-draw-msg"></div>
+    <div id="auto-draw-msg" class="auto-draw-msg" style="display:none;"></div>
     <div id="last-action" class="last-action"></div>
   </div>
+  <div id="my-turn-arrow" class="my-turn-arrow">&darr;</div>
   <div class="hand-wrapper">
     <div id="hand" class="hand"></div>
   </div>
@@ -264,6 +289,8 @@ body {
   var actionInFlight = false;
   var selectedGamesToWin = 1;
   var celebrationDone = false;
+  var autoDrawTimer = null;
+  var autoDrawInProgress = false;
 
   function getParams() {
     var search = window.location.search;
@@ -376,6 +403,59 @@ body {
     }
   }
 
+  function sortHand(cards) {
+    var colorOrder = { wild: 0, red: 1, blue: 2, green: 3, yellow: 4 };
+    var typeOrder = { number: 0, skip: 1, reverse: 2, draw2: 3, wild: 4, wild4: 5 };
+    var sorted = cards.slice();
+    sorted.sort(function(a, b) {
+      var ca = colorOrder[a.color] !== undefined ? colorOrder[a.color] : 99;
+      var cb = colorOrder[b.color] !== undefined ? colorOrder[b.color] : 99;
+      if (ca !== cb) return ca - cb;
+      // Within wild color, wild before wild4
+      if (a.color === "wild" && b.color === "wild") {
+        var ta = a.type === "wild" ? 0 : 1;
+        var tb = b.type === "wild" ? 0 : 1;
+        return ta - tb;
+      }
+      // Within same color: numbers first sorted ascending, then skip, reverse, draw2
+      var ta = typeOrder[a.type] !== undefined ? typeOrder[a.type] : 99;
+      var tb = typeOrder[b.type] !== undefined ? typeOrder[b.type] : 99;
+      if (ta !== tb) return ta - tb;
+      // Both numbers — sort by value
+      if (a.type === "number" && b.type === "number") {
+        return (a.value || 0) - (b.value || 0);
+      }
+      return 0;
+    });
+    return sorted;
+  }
+
+  function triggerAutoDraw(state) {
+    if (autoDrawTimer) { clearTimeout(autoDrawTimer); autoDrawTimer = null; }
+    if (autoDrawInProgress) return;
+    if (!state || state.status !== "playing") return;
+    var myIndex = -1;
+    for (var i = 0; i < state.players.length; i++) {
+      if (state.players[i].id === state.myId) { myIndex = i; break; }
+    }
+    if (myIndex !== state.currentPlayerIndex) return;
+    var playable = getPlayableCards(state);
+    // Auto-draw if mustDraw > 0 OR if no playable cards
+    if (state.mustDraw > 0 || playable.length === 0) {
+      autoDrawInProgress = true;
+      var adMsg = document.getElementById("auto-draw-msg");
+      adMsg.textContent = "Drawing...";
+      adMsg.style.display = "block";
+      autoDrawTimer = setTimeout(function() {
+        autoDrawTimer = null;
+        adMsg.style.display = "none";
+        autoDrawInProgress = false;
+        if (actionInFlight) return;
+        apiPost("/api/game/draw", { code: gameCode, playerId: playerId });
+      }, 1000);
+    }
+  }
+
   function renderGame(state) {
     // Scoreboard (if gamesToWin > 1)
     var gtw = state.gamesToWin || 1;
@@ -457,6 +537,14 @@ body {
 
     document.getElementById("deck-count").textContent = state.deckCount;
 
+    // Draw pile glow when must draw
+    var dpWrapper = document.getElementById("draw-pile-wrapper");
+    if (state.mustDraw > 0 && isMyTurn) {
+      dpWrapper.className = "draw-pile-wrapper must-draw";
+    } else {
+      dpWrapper.className = "draw-pile-wrapper";
+    }
+
     var mdEl = document.getElementById("must-draw-msg");
     if (state.mustDraw > 0 && isMyTurn) {
       mdEl.textContent = "You must draw " + state.mustDraw + " card" + (state.mustDraw > 1 ? "s" : "") + "!";
@@ -466,7 +554,7 @@ body {
 
     document.getElementById("last-action").textContent = state.lastAction || "";
 
-    // Hand
+    // Hand (sorted)
     var handEl = document.getElementById("hand");
     var handHtml = "";
     var playableIds = {};
@@ -474,8 +562,9 @@ body {
       var playable = getPlayableCards(state);
       for (var i = 0; i < playable.length; i++) playableIds[playable[i]] = true;
     }
-    for (var i = 0; i < state.myHand.length; i++) {
-      var card = state.myHand[i];
+    var sortedHand = sortHand(state.myHand);
+    for (var i = 0; i < sortedHand.length; i++) {
+      var card = sortedHand[i];
       var canPlay = playableIds[card.id] === true;
       var cls = "card card-" + card.color;
       if (isMyTurn && state.status === "playing") cls += canPlay ? " playable" : " not-playable";
@@ -484,7 +573,10 @@ body {
       handHtml += '</div>';
     }
     handEl.innerHTML = handHtml;
-    handEl.className = state.myHand.length > 6 ? "hand many-cards" : "hand";
+    handEl.className = sortedHand.length > 6 ? "hand many-cards" : "hand";
+
+    // Auto-draw logic
+    triggerAutoDraw(state);
 
     // UNO button
     var unoBtn = document.getElementById("uno-btn");
@@ -752,16 +844,7 @@ body {
     }
   };
 
-  window.drawCard = function() {
-    if (!currentState || actionInFlight) return;
-    var myIndex = -1;
-    for (var i = 0; i < currentState.players.length; i++) {
-      if (currentState.players[i].id === currentState.myId) { myIndex = i; break; }
-    }
-    if (myIndex !== currentState.currentPlayerIndex) return;
-    if (currentState.status !== "playing") return;
-    apiPost("/api/game/draw", { code: gameCode, playerId: playerId });
-  };
+  /* Drawing is now automatic — no manual draw needed */
 
   window.callUno = function() {
     if (!currentState || actionInFlight) return;
