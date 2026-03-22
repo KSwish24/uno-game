@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { setGame, hasGame } from "@/lib/store";
 import { createDeck, shuffle } from "@/lib/game-engine";
 
+export const dynamic = "force-dynamic";
+
 function generateCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
   let code = "";
