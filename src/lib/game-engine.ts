@@ -219,16 +219,6 @@ export function playCard(
   const card = currentPlayer.hand[cardIdx];
   if (!canPlayCard(game, card)) return "Cannot play this card";
 
-  // UNO check: if playing second-to-last card, must have called UNO
-  if (currentPlayer.hand.length === 2 && !currentPlayer.calledUno) {
-    // Penalty: draw 2 cards
-    drawCards(game, currentPlayer, 2);
-    game.lastAction = `${currentPlayer.name} forgot to call UNO! Drew 2 penalty cards.`;
-    game.lastActionTime = Date.now();
-    game.updatedAt = Date.now();
-    // Still allow the play to go through after penalty
-  }
-
   // Remove card from hand
   currentPlayer.hand.splice(cardIdx, 1);
   game.discardPile.push(card);
