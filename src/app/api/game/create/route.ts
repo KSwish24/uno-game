@@ -32,7 +32,9 @@ export async function POST(request: Request) {
       code: game.code,
       playerId,
     });
-  } catch {
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    console.error("Create game error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
