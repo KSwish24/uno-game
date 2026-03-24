@@ -13,7 +13,97 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+  position: relative;
 }
+
+/* Color tint overlay for game board */
+.color-tint-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.06;
+  -webkit-transition: background 0.6s ease;
+  transition: background 0.6s ease;
+}
+.screen-game.active ~ .color-tint-overlay { display: block; }
+
+/* My turn screen glow */
+.my-turn-glow-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at center bottom, rgba(34,197,94,0.08) 0%, transparent 70%);
+  -webkit-animation: screenGlowPulse 2s ease-in-out infinite alternate;
+  animation: screenGlowPulse 2s ease-in-out infinite alternate;
+}
+.my-turn-glow-overlay.active { display: block; }
+@-webkit-keyframes screenGlowPulse {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+@keyframes screenGlowPulse {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+
+/* YOUR TURN banner */
+.your-turn-banner {
+  display: none;
+  width: 100%;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 26px;
+  font-weight: 900;
+  color: #22c55e;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(34,197,94,0.6), 0 0 40px rgba(34,197,94,0.3), 0 0 60px rgba(34,197,94,0.15);
+  -webkit-animation: bannerGlowPulse 1.2s ease-in-out infinite alternate;
+  animation: bannerGlowPulse 1.2s ease-in-out infinite alternate;
+  position: relative;
+  z-index: 2;
+}
+.your-turn-banner.active { display: block; }
+@-webkit-keyframes bannerGlowPulse {
+  from { opacity: 0.7; text-shadow: 0 0 20px rgba(34,197,94,0.6), 0 0 40px rgba(34,197,94,0.3); }
+  to { opacity: 1; text-shadow: 0 0 30px rgba(34,197,94,0.8), 0 0 60px rgba(34,197,94,0.5), 0 0 80px rgba(34,197,94,0.2); }
+}
+@keyframes bannerGlowPulse {
+  from { opacity: 0.7; text-shadow: 0 0 20px rgba(34,197,94,0.6), 0 0 40px rgba(34,197,94,0.3); }
+  to { opacity: 1; text-shadow: 0 0 30px rgba(34,197,94,0.8), 0 0 60px rgba(34,197,94,0.5), 0 0 80px rgba(34,197,94,0.2); }
+}
+
+/* DRAW banner */
+.draw-banner {
+  display: none;
+  width: 100%;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: #f59e0b;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(245,158,11,0.7), 0 0 32px rgba(245,158,11,0.4);
+  -webkit-animation: drawBannerFlash 0.6s ease-in-out infinite alternate;
+  animation: drawBannerFlash 0.6s ease-in-out infinite alternate;
+  position: relative;
+  z-index: 2;
+}
+.draw-banner.active { display: block; }
+@-webkit-keyframes drawBannerFlash {
+  from { opacity: 0.6; -webkit-transform: scale(1); transform: scale(1); }
+  to { opacity: 1; -webkit-transform: scale(1.03); transform: scale(1.03); }
+}
+@keyframes drawBannerFlash {
+  from { opacity: 0.6; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.03); }
+}
+
 .screen { display: none; min-height: 100vh; }
 .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .screen-game.active { justify-content: flex-start; }
@@ -51,32 +141,87 @@ body {
 .gtw-btn.active { border-color: #f59e0b; background: #1c1917; color: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.3); }
 
 /* Game Board */
-.screen-game { padding: 0; padding-bottom: 0; display: flex; flex-direction: column; min-height: 100vh; }
+.screen-game { padding: 0; padding-bottom: 0; display: flex; flex-direction: column; min-height: 100vh; position: relative; z-index: 1; }
 .screen-game.active { display: flex; justify-content: flex-start; }
 .game-middle { display: flex; flex: 1; align-items: stretch; }
 .opp-slot { display: flex; align-items: center; justify-content: center; }
 .opp-top { width: 100%; padding: 8px 0; }
 .opp-side { width: 70px; flex-shrink: 0; padding: 4px; }
-.opp { background: #111827; border: 2px solid #1f2937; border-radius: 10px; padding: 6px 12px; font-size: 13px; text-align: center; min-width: 60px; position: relative; }
-.opp.active-turn { border-color: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.5); }
+.opp { background: #111827; border: 2px solid #1f2937; border-radius: 10px; padding: 6px 12px; font-size: 13px; text-align: center; min-width: 60px; position: relative; -webkit-transition: border-color 0.3s, box-shadow 0.3s; transition: border-color 0.3s, box-shadow 0.3s; }
+.opp.active-turn {
+  border-color: #f59e0b;
+  border-width: 3px;
+  box-shadow: 0 0 20px rgba(245,158,11,0.6), 0 0 40px rgba(245,158,11,0.3), 0 0 60px rgba(245,158,11,0.15);
+  -webkit-animation: oppTurnPulse 1s ease-in-out infinite alternate;
+  animation: oppTurnPulse 1s ease-in-out infinite alternate;
+}
+@-webkit-keyframes oppTurnPulse {
+  from { box-shadow: 0 0 20px rgba(245,158,11,0.6), 0 0 40px rgba(245,158,11,0.3); }
+  to { box-shadow: 0 0 30px rgba(245,158,11,0.8), 0 0 60px rgba(245,158,11,0.45), 0 0 80px rgba(245,158,11,0.2); }
+}
+@keyframes oppTurnPulse {
+  from { box-shadow: 0 0 20px rgba(245,158,11,0.6), 0 0 40px rgba(245,158,11,0.3); }
+  to { box-shadow: 0 0 30px rgba(245,158,11,0.8), 0 0 60px rgba(245,158,11,0.45), 0 0 80px rgba(245,158,11,0.2); }
+}
+
+/* Pulsing ring around active opponent */
+.opp.active-turn::before {
+  content: "";
+  position: absolute;
+  top: -6px; left: -6px; right: -6px; bottom: -6px;
+  border-radius: 14px;
+  border: 2px solid rgba(245,158,11,0.5);
+  -webkit-animation: oppRingPulse 1.2s ease-in-out infinite;
+  animation: oppRingPulse 1.2s ease-in-out infinite;
+}
+@-webkit-keyframes oppRingPulse {
+  0% { -webkit-transform: scale(1); transform: scale(1); opacity: 0.7; }
+  50% { -webkit-transform: scale(1.08); transform: scale(1.08); opacity: 0.3; }
+  100% { -webkit-transform: scale(1); transform: scale(1); opacity: 0.7; }
+}
+@keyframes oppRingPulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 0.3; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+/* Card count badge on opponents */
+.opp-card-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #030712;
+  z-index: 2;
+}
+
 .opp .opp-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
 .opp .opp-cards { color: #9ca3af; font-size: 11px; margin-top: 2px; }
-.opp .turn-arrow { display: none; position: absolute; font-size: 18px; color: #f59e0b; animation: bounceArrow 0.6s ease-in-out infinite alternate; }
-.opp-top .turn-arrow { bottom: -18px; left: 50%; transform: translateX(-50%); }
-.opp-side .turn-arrow { font-size: 14px; }
-.opp-left-slot .turn-arrow { right: -16px; top: 50%; transform: translateY(-50%); }
-.opp-right-slot .turn-arrow { left: -16px; top: 50%; transform: translateY(-50%); }
+.opp .turn-arrow { display: none; position: absolute; font-size: 26px; color: #f59e0b; -webkit-animation: bounceArrow 0.6s ease-in-out infinite alternate; animation: bounceArrow 0.6s ease-in-out infinite alternate; text-shadow: 0 0 10px rgba(245,158,11,0.6); }
+.opp-top .turn-arrow { bottom: -22px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%); }
+.opp-side .turn-arrow { font-size: 20px; }
+.opp-left-slot .turn-arrow { right: -20px; top: 50%; -webkit-transform: translateY(-50%); transform: translateY(-50%); }
+.opp-right-slot .turn-arrow { left: -20px; top: 50%; -webkit-transform: translateY(-50%); transform: translateY(-50%); }
 .opp.active-turn .turn-arrow { display: block; }
 .opp-side .opp { font-size: 11px; padding: 6px 6px; min-width: auto; }
 .opp-side .opp-name { max-width: 55px; font-size: 11px; }
 .opp-side .opp-cards { font-size: 10px; }
-@-webkit-keyframes bounceArrow { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(4px); } }
+@-webkit-keyframes bounceArrow { from { -webkit-transform: translateX(-50%) translateY(0); transform: translateX(-50%) translateY(0); } to { -webkit-transform: translateX(-50%) translateY(4px); transform: translateX(-50%) translateY(4px); } }
 @keyframes bounceArrow { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(4px); } }
 
 /* Your turn arrow */
-.my-turn-arrow { display: none; font-size: 80px; color: #22c55e; text-align: center; animation: bigBounceArrow 0.6s ease-in-out infinite alternate; padding: 0; line-height: 1; text-shadow: 0 0 20px rgba(34,197,94,0.6), 0 0 40px rgba(34,197,94,0.3); }
+.my-turn-arrow { display: none; font-size: 80px; color: #22c55e; text-align: center; -webkit-animation: bigBounceArrow 0.6s ease-in-out infinite alternate; animation: bigBounceArrow 0.6s ease-in-out infinite alternate; padding: 0; line-height: 1; text-shadow: 0 0 20px rgba(34,197,94,0.6), 0 0 40px rgba(34,197,94,0.3); }
 .my-turn-arrow.active { display: block; }
-@-webkit-keyframes bigBounceArrow { from { transform: translateY(0); } to { transform: translateY(10px); } }
+@-webkit-keyframes bigBounceArrow { from { -webkit-transform: translateY(0); transform: translateY(0); } to { -webkit-transform: translateY(10px); transform: translateY(10px); } }
 @keyframes bigBounceArrow { from { transform: translateY(0); } to { transform: translateY(10px); } }
 
 /* Auto-draw message */
@@ -84,34 +229,111 @@ body {
 @keyframes drawPulse { from { opacity: 0.6; } to { opacity: 1; } }
 
 /* Draw pile stacked look */
-.draw-pile-wrapper { position: relative; width: 70px; height: 100px; }
+.draw-pile-wrapper { position: relative; width: 70px; height: 100px; -webkit-transition: -webkit-transform 0.3s ease; transition: transform 0.3s ease; }
 .draw-pile-stack { position: absolute; width: 70px; height: 100px; border-radius: 10px; background: #1a2030; border: 3px solid #2d3748; }
 .draw-pile-stack-1 { top: 4px; left: 4px; }
 .draw-pile-stack-2 { top: 2px; left: 2px; }
 .draw-pile { position: absolute; top: 0; left: 0; }
 
-/* Draw pile glow when must draw */
-.draw-pile-wrapper.must-draw .draw-pile { border-color: #f59e0b; box-shadow: 0 0 16px rgba(245,158,11,0.6); }
+/* Draw pile glow when must draw — MASSIVE glow */
+.draw-pile-wrapper.must-draw {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
+  cursor: pointer;
+}
+.draw-pile-wrapper.must-draw .draw-pile {
+  border-color: #f59e0b;
+  box-shadow: 0 0 20px rgba(245,158,11,0.7), 0 0 40px rgba(245,158,11,0.5), 0 0 60px rgba(245,158,11,0.3);
+  cursor: pointer;
+  -webkit-animation: drawPileGlow 0.8s ease-in-out infinite alternate;
+  animation: drawPileGlow 0.8s ease-in-out infinite alternate;
+}
+@-webkit-keyframes drawPileGlow {
+  from { box-shadow: 0 0 20px rgba(245,158,11,0.7), 0 0 40px rgba(245,158,11,0.5); }
+  to { box-shadow: 0 0 30px rgba(245,158,11,0.9), 0 0 60px rgba(245,158,11,0.6), 0 0 80px rgba(245,158,11,0.3); }
+}
+@keyframes drawPileGlow {
+  from { box-shadow: 0 0 20px rgba(245,158,11,0.7), 0 0 40px rgba(245,158,11,0.5); }
+  to { box-shadow: 0 0 30px rgba(245,158,11,0.9), 0 0 60px rgba(245,158,11,0.6), 0 0 80px rgba(245,158,11,0.3); }
+}
+/* Pulsing rings around draw pile when must draw */
+.draw-pile-wrapper.must-draw::before,
+.draw-pile-wrapper.must-draw::after {
+  content: "";
+  position: absolute;
+  top: -8px; left: -8px; right: -8px; bottom: -8px;
+  border-radius: 14px;
+  border: 2px solid rgba(245,158,11,0.5);
+  pointer-events: none;
+}
+.draw-pile-wrapper.must-draw::before {
+  -webkit-animation: drawRingPulse 1.2s ease-in-out infinite;
+  animation: drawRingPulse 1.2s ease-in-out infinite;
+}
+.draw-pile-wrapper.must-draw::after {
+  -webkit-animation: drawRingPulse 1.2s ease-in-out infinite 0.4s;
+  animation: drawRingPulse 1.2s ease-in-out infinite 0.4s;
+}
+@-webkit-keyframes drawRingPulse {
+  0% { -webkit-transform: scale(1); transform: scale(1); opacity: 0.7; }
+  50% { -webkit-transform: scale(1.15); transform: scale(1.15); opacity: 0; }
+  100% { -webkit-transform: scale(1); transform: scale(1); opacity: 0; }
+}
+@keyframes drawRingPulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.15); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
 .draw-pile-wrapper:not(.must-draw) .draw-pile { opacity: 0.8; }
 
 /* Scoreboard bar */
-.scoreboard { width: 100%; display: flex; justify-content: center; gap: 12px; padding: 6px 8px; background: #0a0f1a; border-bottom: 1px solid #1f2937; font-size: 11px; color: #9ca3af; }
+.scoreboard { width: 100%; display: flex; justify-content: center; gap: 12px; padding: 8px 12px; background: linear-gradient(to right, rgba(10,15,26,0.95), rgba(17,24,39,0.95), rgba(10,15,26,0.95)); border-bottom: 2px solid #f59e0b; font-size: 13px; font-weight: 600; color: #d1d5db; position: relative; z-index: 2; }
 .scoreboard .score-item { display: flex; align-items: center; gap: 4px; }
-.scoreboard .score-wins { color: #22c55e; font-weight: 700; }
+.scoreboard .score-wins { color: #22c55e; font-weight: 700; font-size: 15px; }
 
 /* Center area */
 .center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 0; position: relative; }
-.direction-indicator { font-size: 20px; color: #6b7280; margin-bottom: 4px; }
+.direction-indicator { font-size: 32px; color: #9ca3af; margin-bottom: 4px; text-shadow: 0 0 12px rgba(156,163,175,0.3); -webkit-animation: directionSpin 0.3s ease; animation: directionSpin 0.3s ease; }
+@-webkit-keyframes directionSpin {
+  from { -webkit-transform: rotate(-20deg); transform: rotate(-20deg); opacity: 0.5; }
+  to { -webkit-transform: rotate(0deg); transform: rotate(0deg); opacity: 1; }
+}
+@keyframes directionSpin {
+  from { transform: rotate(-20deg); opacity: 0.5; }
+  to { transform: rotate(0deg); opacity: 1; }
+}
 .pile-area { display: flex; align-items: center; justify-content: center; gap: 24px; margin: 8px 0; }
-.top-card { width: 70px; height: 100px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; border: 3px solid rgba(255,255,255,0.2); position: relative; }
+
+/* Top card (discard pile) with color glow */
+.top-card {
+  width: 70px;
+  height: 100px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 900;
+  border: 3px solid rgba(255,255,255,0.2);
+  position: relative;
+  -webkit-transition: box-shadow 0.4s ease;
+  transition: box-shadow 0.4s ease;
+}
+.top-card.glow-red { box-shadow: 0 0 16px rgba(239,68,68,0.5), 0 0 32px rgba(239,68,68,0.25); }
+.top-card.glow-blue { box-shadow: 0 0 16px rgba(59,130,246,0.5), 0 0 32px rgba(59,130,246,0.25); }
+.top-card.glow-green { box-shadow: 0 0 16px rgba(34,197,94,0.5), 0 0 32px rgba(34,197,94,0.25); }
+.top-card.glow-yellow { box-shadow: 0 0 16px rgba(234,179,8,0.5), 0 0 32px rgba(234,179,8,0.25); }
+.top-card.glow-wild { box-shadow: 0 0 16px rgba(107,114,128,0.4), 0 0 32px rgba(107,114,128,0.2); }
+
 .draw-pile { width: 70px; height: 100px; border-radius: 10px; background: #1f2937; border: 3px solid #374151; display: flex; flex-direction: column; align-items: center; justify-content: center; -webkit-user-select: none; user-select: none; }
 .draw-pile .deck-label { font-size: 11px; color: #9ca3af; margin-top: 4px; }
 .draw-pile .deck-count { font-size: 18px; font-weight: 700; }
 .color-dot { width: 20px; height: 20px; border-radius: 50%; margin: 4px auto 0; border: 2px solid rgba(255,255,255,0.3); }
 .last-action { font-size: 13px; color: #9ca3af; text-align: center; margin: 4px 0; min-height: 20px; }
-.must-draw-msg { font-size: 13px; color: #f59e0b; font-weight: 600; text-align: center; margin: 2px 0; }
+.must-draw-msg { font-size: 15px; color: #f59e0b; font-weight: 700; text-align: center; margin: 2px 0; }
 .turn-msg { font-size: 15px; font-weight: 700; text-align: center; margin: 4px 0; min-height: 22px; }
-.turn-msg.my-turn { color: #22c55e; }
+.turn-msg.my-turn { color: #22c55e; font-size: 24px; text-shadow: 0 0 12px rgba(34,197,94,0.4); }
 .turn-msg.not-my-turn { color: #6b7280; }
 
 /* Wild color picker */
@@ -120,7 +342,7 @@ body {
 .color-picker-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
 .color-picker-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; max-width: 240px; }
 .color-btn { width: 100px; height: 100px; border-radius: 16px; border: 3px solid rgba(255,255,255,0.3); cursor: pointer; font-size: 16px; font-weight: 700; color: #fff; }
-.color-btn:active { transform: scale(0.9); }
+.color-btn:active { -webkit-transform: scale(0.9); transform: scale(0.9); }
 .color-btn-red { background: #ef4444; }
 .color-btn-blue { background: #3b82f6; }
 .color-btn-green { background: #22c55e; }
@@ -128,25 +350,87 @@ body {
 
 /* UNO button */
 .uno-btn { display: none; position: fixed; bottom: 200px; right: 16px; width: 70px; height: 70px; border-radius: 50%; background: #dc2626; color: #fff; font-size: 18px; font-weight: 900; border: 3px solid #fff; cursor: pointer; z-index: 50; box-shadow: 0 4px 20px rgba(220,38,38,0.5); }
-.uno-btn.active { display: block; animation: unoPulse 0.8s ease-in-out infinite alternate; }
-@-webkit-keyframes unoPulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+.uno-btn.active { display: block; -webkit-animation: unoPulse 0.8s ease-in-out infinite alternate; animation: unoPulse 0.8s ease-in-out infinite alternate; }
+@-webkit-keyframes unoPulse { from { -webkit-transform: scale(1); transform: scale(1); } to { -webkit-transform: scale(1.1); transform: scale(1.1); } }
 @keyframes unoPulse { from { transform: scale(1); } to { transform: scale(1.1); } }
 
 /* Hand */
-.hand-wrapper { width: 100%; background: #0a0f1a; border-top: 1px solid #1f2937; padding: 8px 4px 16px; }
+.hand-wrapper { width: 100%; background: #0a0f1a; border-top: 1px solid #1f2937; padding: 8px 4px 16px; -webkit-transition: border-color 0.3s, box-shadow 0.3s; transition: border-color 0.3s, box-shadow 0.3s; }
+.hand-wrapper.my-turn-glow {
+  border-top: 2px solid #22c55e;
+  box-shadow: 0 -4px 20px rgba(34,197,94,0.25), 0 -8px 40px rgba(34,197,94,0.1);
+}
 .hand { display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 8px 4px; gap: 6px; justify-content: center; }
 .hand.many-cards { justify-content: flex-start; }
-.card { width: 60px; height: 90px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.15); cursor: pointer; -webkit-user-select: none; user-select: none; position: relative; transition: transform 0.15s, box-shadow 0.15s; }
-.card.playable { transform: translateY(-8px); border-color: rgba(255,255,255,0.5); box-shadow: 0 4px 12px rgba(255,255,255,0.15); }
+
+/* Card styles — now with white oval center and corner numbers */
+.card {
+  width: 65px;
+  height: 95px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.15);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  position: relative;
+  -webkit-transition: -webkit-transform 0.15s, box-shadow 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), inset 0 -1px 3px rgba(0,0,0,0.1);
+}
+
+/* White oval center on cards */
+.card-center-oval {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%) rotate(-15deg);
+  transform: translate(-50%, -50%) rotate(-15deg);
+  width: 80%;
+  height: 65%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  pointer-events: none;
+}
+
+/* Corner numbers */
+.card-corner {
+  position: absolute;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  opacity: 0.9;
+}
+.card-corner-tl { top: 4px; left: 5px; }
+.card-corner-br { bottom: 4px; right: 5px; -webkit-transform: rotate(180deg); transform: rotate(180deg); }
+
+.card .card-value { font-size: 24px; line-height: 1; position: relative; z-index: 1; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+.card .card-label { font-size: 9px; margin-top: 2px; opacity: 0.8; position: relative; z-index: 1; }
+
+.card.playable {
+  -webkit-transform: translateY(-12px);
+  transform: translateY(-12px);
+  border-color: rgba(255,255,255,0.7);
+  box-shadow: 0 6px 20px rgba(255,255,255,0.25), 0 2px 8px rgba(255,255,255,0.15), inset 0 2px 4px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+.card.playable:active {
+  -webkit-transform: translateY(-6px) scale(0.95);
+  transform: translateY(-6px) scale(0.95);
+}
 .card.not-playable { opacity: 0.45; cursor: default; }
-.card .card-value { font-size: 22px; line-height: 1; }
-.card .card-label { font-size: 9px; margin-top: 2px; opacity: 0.8; }
 .card-red { background: #ef4444; color: #fff; }
 .card-blue { background: #3b82f6; color: #fff; }
 .card-green { background: #22c55e; color: #fff; }
 .card-yellow { background: #eab308; color: #000; }
 .card-wild { background: #1f2937; color: #fff; border-color: #6b7280; }
-.wild-diamond { display: flex; flex-wrap: wrap; width: 24px; height: 24px; }
+.wild-diamond { display: flex; flex-wrap: wrap; width: 24px; height: 24px; position: relative; z-index: 1; }
 .wild-diamond span { width: 12px; height: 12px; }
 .wd-r { background: #ef4444; border-radius: 2px 0 0 0; }
 .wd-b { background: #3b82f6; border-radius: 0 2px 0 0; }
@@ -165,21 +449,22 @@ body {
 /* Fireworks / Celebration */
 .fireworks { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 250; pointer-events: none; overflow: hidden; }
 .fireworks.active { display: block; }
-.firework { position: absolute; width: 6px; height: 6px; border-radius: 50%; animation: fireworkShoot 1s ease-out forwards; }
-@-webkit-keyframes fireworkShoot { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.3) translateY(-80px); } }
+.firework { position: absolute; width: 6px; height: 6px; border-radius: 50%; -webkit-animation: fireworkShoot 1s ease-out forwards; animation: fireworkShoot 1s ease-out forwards; }
+@-webkit-keyframes fireworkShoot { 0% { opacity: 1; -webkit-transform: scale(1); transform: scale(1); } 100% { opacity: 0; -webkit-transform: scale(0.3) translateY(-80px); transform: scale(0.3) translateY(-80px); } }
 @keyframes fireworkShoot { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.3) translateY(-80px); } }
-.champion-title { font-size: 56px; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6, #3b82f6, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; animation: champPulse 1s ease-in-out infinite alternate; }
-@-webkit-keyframes champPulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+.champion-title { font-size: 56px; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6, #3b82f6, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; -webkit-animation: champPulse 1s ease-in-out infinite alternate; animation: champPulse 1s ease-in-out infinite alternate; }
+@-webkit-keyframes champPulse { from { -webkit-transform: scale(1); transform: scale(1); } to { -webkit-transform: scale(1.05); transform: scale(1.05); } }
 @keyframes champPulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 
 /* Error toast */
-.toast { display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #dc2626; color: #fff; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; z-index: 300; max-width: 90%; text-align: center; }
+.toast { display: none; position: fixed; top: 16px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%); background: #dc2626; color: #fff; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; z-index: 300; max-width: 90%; text-align: center; }
 .toast.active { display: block; }
 
 @media (min-width: 600px) {
   .card { width: 80px; height: 120px; border-radius: 10px; }
   .card .card-value { font-size: 30px; }
   .card .card-label { font-size: 11px; }
+  .card-corner { font-size: 12px; }
   .top-card { width: 90px; height: 130px; font-size: 28px; }
   .draw-pile { width: 90px; height: 130px; }
   .draw-pile-wrapper { width: 90px; height: 130px; }
@@ -230,6 +515,8 @@ body {
 <!-- Game Screen -->
 <div id="screen-game" class="screen screen-game">
   <div id="scoreboard" class="scoreboard" style="display:none;"></div>
+  <div id="your-turn-banner" class="your-turn-banner">YOUR TURN</div>
+  <div id="draw-banner" class="draw-banner">TAP THE DECK TO DRAW!</div>
   <div id="opp-top" class="opp-slot opp-top"></div>
   <div class="game-middle">
     <div id="opp-left" class="opp-slot opp-side opp-left-slot"></div>
@@ -254,10 +541,16 @@ body {
     <div id="opp-right" class="opp-slot opp-side opp-right-slot"></div>
   </div>
   <div id="my-turn-arrow" class="my-turn-arrow">&darr;</div>
-  <div class="hand-wrapper">
+  <div id="hand-wrapper" class="hand-wrapper">
     <div id="hand" class="hand"></div>
   </div>
 </div>
+
+<!-- Color tint overlay -->
+<div id="color-tint-overlay" class="color-tint-overlay"></div>
+
+<!-- My turn screen glow overlay -->
+<div id="my-turn-glow-overlay" class="my-turn-glow-overlay"></div>
 
 <!-- Wild Color Picker -->
 <div id="color-picker" class="color-picker">
@@ -475,6 +768,7 @@ body {
     function makeOppHtml(opp, arrowChar) {
       var isActive = (opp.index === state.currentPlayerIndex);
       var html = '<div class="opp' + (isActive ? ' active-turn' : '') + '">';
+      html += '<span class="opp-card-badge">' + opp.player.cardCount + '</span>';
       html += '<div class="opp-name">' + escapeHtml(opp.player.name) + '</div>';
       html += '<div class="opp-cards">' + opp.player.cardCount + ' card' + (opp.player.cardCount !== 1 ? 's' : '') + '</div>';
       html += '<div class="turn-arrow">' + arrowChar + '</div>';
@@ -507,33 +801,49 @@ body {
     var dirEl = document.getElementById("direction");
     dirEl.textContent = state.direction === 1 ? "\u27F3" : "\u27F2";
 
-    // Turn message + my turn arrow
+    // Turn message + my turn arrow + banners + overlays
     var turnEl = document.getElementById("turn-msg");
     var myArrow = document.getElementById("my-turn-arrow");
+    var yourTurnBanner = document.getElementById("your-turn-banner");
+    var drawBanner = document.getElementById("draw-banner");
+    var turnGlowOverlay = document.getElementById("my-turn-glow-overlay");
+    var handWrapper = document.getElementById("hand-wrapper");
     var isMyTurn = (myIndex === state.currentPlayerIndex);
+
     if (state.status === "finished") {
       turnEl.textContent = "";
       turnEl.className = "turn-msg";
       myArrow.className = "my-turn-arrow";
+      yourTurnBanner.className = "your-turn-banner";
+      drawBanner.className = "draw-banner";
+      turnGlowOverlay.className = "my-turn-glow-overlay";
+      handWrapper.className = "hand-wrapper";
     } else if (isMyTurn) {
       turnEl.textContent = "Your turn!";
       turnEl.className = "turn-msg my-turn";
       myArrow.className = "my-turn-arrow active";
+      yourTurnBanner.className = "your-turn-banner active";
+      turnGlowOverlay.className = "my-turn-glow-overlay active";
+      handWrapper.className = "hand-wrapper my-turn-glow";
     } else {
       var cp = state.players[state.currentPlayerIndex];
       turnEl.textContent = cp ? (escapeHtml(cp.name) + "'s turn") : "";
       turnEl.className = "turn-msg not-my-turn";
       myArrow.className = "my-turn-arrow";
+      yourTurnBanner.className = "your-turn-banner";
+      drawBanner.className = "draw-banner";
+      turnGlowOverlay.className = "my-turn-glow-overlay";
+      handWrapper.className = "hand-wrapper";
     }
 
     // Top card
-    var topEl = document.getElementById("top-card");
+    var topCardEl = document.getElementById("top-card");
     if (state.topCard) {
-      topEl.innerHTML = renderCardInner(state.topCard);
-      topEl.className = "top-card card-" + state.topCard.color;
+      topCardEl.innerHTML = renderCardInner(state.topCard);
+      topCardEl.className = "top-card card-" + state.topCard.color + " glow-" + state.topCard.color;
     } else {
-      topEl.innerHTML = "";
-      topEl.className = "top-card";
+      topCardEl.innerHTML = "";
+      topCardEl.className = "top-card";
     }
 
     // Color indicator
@@ -542,6 +852,15 @@ body {
       colorEl.innerHTML = '<div class="color-dot" style="background:' + getColorHex(state.currentColor) + ';"></div>';
     } else {
       colorEl.innerHTML = "";
+    }
+
+    // Color tint overlay
+    var tintEl = document.getElementById("color-tint-overlay");
+    if (state.currentColor) {
+      tintEl.style.background = getColorHex(state.currentColor);
+      tintEl.style.display = "block";
+    } else {
+      tintEl.style.display = "none";
     }
 
     document.getElementById("deck-count").textContent = state.deckCount;
@@ -584,24 +903,42 @@ body {
     handEl.innerHTML = handHtml;
     handEl.className = sortedHand.length > 6 ? "hand many-cards" : "hand";
 
-    // Auto-draw logic
     // Draw pile highlight when player needs to draw
     var dpWrapper = document.getElementById("draw-pile-wrapper");
     if (isMyTurn && state.status === "playing") {
       var playable2 = getPlayableCards(state);
       if (state.mustDraw > 0 || playable2.length === 0) {
         dpWrapper.className = "draw-pile-wrapper must-draw";
+        // Show draw banner with specific text
+        if (state.mustDraw > 0) {
+          drawBanner.textContent = "DRAW " + state.mustDraw + " CARD" + (state.mustDraw > 1 ? "S" : "") + "!";
+        } else {
+          drawBanner.textContent = "TAP TO DRAW!";
+        }
+        drawBanner.className = "draw-banner active";
       } else {
         dpWrapper.className = "draw-pile-wrapper";
+        drawBanner.className = "draw-banner";
       }
     } else {
       dpWrapper.className = "draw-pile-wrapper";
+      if (drawBanner) drawBanner.className = "draw-banner";
     }
 
     // UNO button
   }
 
   function renderGameOver(state) {
+    // Hide turn-related overlays
+    var yourTurnBanner = document.getElementById("your-turn-banner");
+    var drawBanner = document.getElementById("draw-banner");
+    var turnGlowOverlay = document.getElementById("my-turn-glow-overlay");
+    var handWrapper = document.getElementById("hand-wrapper");
+    if (yourTurnBanner) yourTurnBanner.className = "your-turn-banner";
+    if (drawBanner) drawBanner.className = "draw-banner";
+    if (turnGlowOverlay) turnGlowOverlay.className = "my-turn-glow-overlay";
+    if (handWrapper) handWrapper.className = "hand-wrapper";
+
     var overlay = document.getElementById("game-over");
     overlay.className = "game-over active";
     var winnerName = "";
@@ -796,14 +1133,24 @@ body {
   }
 
   function renderCardInner(card) {
-    var val = "", label = "";
-    if (card.type === "number") { val = String(card.value); }
-    else if (card.type === "skip") { val = "\u2298"; label = "SKIP"; }
-    else if (card.type === "reverse") { val = "\u21C4"; label = "REV"; }
-    else if (card.type === "draw2") { val = "+2"; label = "DRAW"; }
-    else if (card.type === "wild") { return '<div class="wild-diamond"><span class="wd-r"></span><span class="wd-b"></span><span class="wd-g"></span><span class="wd-y"></span></div><div class="card-label">WILD</div>'; }
-    else if (card.type === "wild4") { return '<div class="card-value">+4</div><div class="card-label">WILD</div>'; }
-    var html = '<div class="card-value">' + val + '</div>';
+    var val = "", label = "", cornerVal = "";
+    if (card.type === "number") {
+      val = String(card.value);
+      cornerVal = val;
+    }
+    else if (card.type === "skip") { val = "\u2298"; label = "SKIP"; cornerVal = "\u2298"; }
+    else if (card.type === "reverse") { val = "\u21C4"; label = "REV"; cornerVal = "\u21C4"; }
+    else if (card.type === "draw2") { val = "+2"; label = "DRAW"; cornerVal = "+2"; }
+    else if (card.type === "wild") {
+      return '<div class="card-center-oval"></div><span class="card-corner card-corner-tl">W</span><span class="card-corner card-corner-br">W</span><div class="wild-diamond"><span class="wd-r"></span><span class="wd-b"></span><span class="wd-g"></span><span class="wd-y"></span></div><div class="card-label">WILD</div>';
+    }
+    else if (card.type === "wild4") {
+      return '<div class="card-center-oval"></div><span class="card-corner card-corner-tl">+4</span><span class="card-corner card-corner-br">+4</span><div class="card-value">+4</div><div class="card-label">WILD</div>';
+    }
+    var html = '<div class="card-center-oval"></div>';
+    html += '<span class="card-corner card-corner-tl">' + cornerVal + '</span>';
+    html += '<span class="card-corner card-corner-br">' + cornerVal + '</span>';
+    html += '<div class="card-value">' + val + '</div>';
     if (label) html += '<div class="card-label">' + label + '</div>';
     return html;
   }
