@@ -186,6 +186,9 @@ export function GameBoard({ game, onPlayCard, onDrawCard, onCallUno, error }: Ga
         <div className="flex items-center gap-6 sm:gap-10">
           {/* Draw deck */}
           <div className="flex flex-col items-center gap-1">
+            {isMyTurn && game.mustDraw > 0 && (
+              <span className="text-green-400 text-2xl animate-bounce">&darr;</span>
+            )}
             <CardBack
               onClick={isMyTurn ? onDrawCard : undefined}
             />
@@ -253,13 +256,15 @@ export function GameBoard({ game, onPlayCard, onDrawCard, onCallUno, error }: Ga
             {game.myHand.map((card, idx) => (
               <div
                 key={card.id}
-                className="flex-shrink-0 transition-transform"
-                style={{ marginLeft: idx > 0 && game.myHand.length > 10 ? "-16px" : idx > 0 && game.myHand.length > 7 ? "-8px" : "0" }}
+                className="flex-shrink-0 relative hover:z-50"
+                style={{
+                  marginLeft: idx > 0 && game.myHand.length > 10 ? "-16px" : idx > 0 && game.myHand.length > 7 ? "-8px" : "0",
+                  zIndex: idx,
+                }}
               >
                 <UnoCard
                   card={card}
-                  playable={playableCardIds.has(card.id)}
-                  onClick={playableCardIds.has(card.id) ? () => handleCardClick(card) : undefined}
+                  onClick={() => handleCardClick(card)}
                 />
               </div>
             ))}

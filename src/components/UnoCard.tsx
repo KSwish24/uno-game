@@ -31,13 +31,12 @@ function cardLabel(card: Card): { top: string; center: string } {
 
 interface UnoCardProps {
   card: Card;
-  playable?: boolean;
   onClick?: () => void;
   small?: boolean;
   currentColor?: Color | null;
 }
 
-export function UnoCard({ card, playable, onClick, small, currentColor }: UnoCardProps) {
+export function UnoCard({ card, onClick, small, currentColor }: UnoCardProps) {
   const colors = COLOR_MAP[card.color] || COLOR_MAP.wild;
   const { top, center } = cardLabel(card);
   const isWild = card.type === "wild" || card.type === "wild4";
@@ -49,16 +48,14 @@ export function UnoCard({ card, playable, onClick, small, currentColor }: UnoCar
   return (
     <button
       onClick={onClick}
-      disabled={!playable && !onClick}
+      disabled={!onClick}
       className={`
         ${sizeClasses}
         relative rounded-xl border-2 ${colors.border} ${colors.bg} ${colors.text}
         flex flex-col items-center justify-center
         font-bold shadow-lg select-none
         transition-all duration-150
-        ${playable ? "hover:-translate-y-3 hover:shadow-2xl hover:scale-105 cursor-pointer ring-2 ring-white/40" : ""}
-        ${!playable && onClick ? "cursor-pointer hover:brightness-110" : ""}
-        ${!playable && !onClick ? "opacity-60" : ""}
+        ${onClick ? "cursor-pointer hover:brightness-110" : ""}
       `}
     >
       {/* Top-left label */}
